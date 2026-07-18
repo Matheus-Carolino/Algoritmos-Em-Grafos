@@ -10,5 +10,6 @@
 
     //Assinatura das funções principais dos grafos
     void adicionarAresta(Grafo *grafo, int origem, int destino, int peso);
+    void ordemTopologica (Grafo *grafo);
 
 #endif //GRAFOS_GRAFO_H

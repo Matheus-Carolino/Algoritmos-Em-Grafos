@@ -51,3 +51,62 @@
         grafo->lista[origem] = novo;
     }
 
+    void ordemTopologica (Grafo *grafo) { 
+        No* atual;
+        int zeroSetasApontando[grafo->V+1];
+        int setasApontando[grafo->V+1];
+        int inicio = 1;
+        int fim = 1;
+        int vertices = 0;
+        int temp;
+        int zeros;
+
+        for (int i = 0; i < grafo->V + 1; i++) {
+            setasApontando[i] = 0;
+            zeroSetasApontando[i] = 0;
+        }
+        for (int i = 1; i < grafo->V+1; i++) {
+            atual = grafo->lista[i];
+            while (atual != NULL) {
+                setasApontando[atual->destino]++;
+                atual = atual->prox;
+            }
+        }
+
+        for (int i = 1; i < grafo->V+1; i ++) {
+            if (setasApontando[i] == 0) {
+            zeroSetasApontando[fim] = i;
+            fim++;
+            }
+        }
+
+        while (inicio < fim) {
+            zeros = zeroSetasApontando[inicio];
+            vertices++;
+            atual = grafo->lista[zeros];
+            while (atual != NULL) {
+                temp = atual->destino;
+                setasApontando[temp]--;
+
+                if (setasApontando[temp] == 0) {
+                    zeroSetasApontando[fim] = temp;
+                    fim++;
+                }
+            
+                atual = atual->prox;
+            }
+
+            inicio++;
+        }
+
+
+
+
+        if (vertices < grafo->V) {
+            printf("O Grafo não é aciclíco\n"); // ciclico;
+        } else {
+            for (int i =1; i < grafo->V+1; i++) {
+                printf("%d\n", zeroSetasApontando[i]); //já sai na ordem topológica
+            }
+        }
+    }
