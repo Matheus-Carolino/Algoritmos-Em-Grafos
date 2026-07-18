@@ -6,6 +6,7 @@
 ## Desenvolvedores
 * **Matheus da Silva Carolino**
 * **Simão Baptista Sunga**
+* **Pedro Tavares Oliveira**
 
 ---
 
