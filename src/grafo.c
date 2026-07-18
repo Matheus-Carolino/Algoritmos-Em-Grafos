@@ -61,7 +61,7 @@
         }
 
         // Tratamento de erro para vértice inválido
-        if (origem < 0 || origem >= grafo->V) {
+        if (origem < 0 || origem > grafo->V) {
             printf("Erro: Vertice de origem %d invalido para um grafo com %d vertices.\n", origem, grafo->V);
             return;
         }
