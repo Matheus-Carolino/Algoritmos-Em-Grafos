@@ -31,11 +31,11 @@
         grafo->V = vertices;
         grafo->A = arestas;
 
-        //Aloca o array de listas (indexado de 1 até V)
-        grafo->lista = (No**)malloc((vertices + 1) * sizeof(No*));
+        //Aloca o array de listas (indexado de 0 até V - 1)
+        grafo->lista = (No**)malloc((vertices) * sizeof(No*));
 
         //Inicializa todas as listas como vazias
-        for (int i = 0; i <= vertices; i++) {
+        for (int i = 0; i < vertices; i++) {
             grafo->lista[i] = NULL;
         }
         return grafo;
@@ -187,7 +187,7 @@
         }
 
         // Tratamento de erro para vértice inválido
-        if (origem < 0 || origem > grafo->V) {
+        if (origem < 0 || origem >= grafo->V) {
             printf("Erro: Vertice de origem %d invalido para um grafo com %d vertices.\n", origem, grafo->V);
             return;
         }
@@ -222,9 +222,11 @@
             while (aux) {
                 // Se o vizinho ainda não foi visitado, processa e enfileira
                 if (!visitado[aux->destino]) {
-                    visitado[aux->destino] = 1;
-                    distancia[aux->destino] = distancia[vert] + 1;
-                    fila[fim++] = aux->destino;
+                    if (aux->destino >= 0 && aux->destino < grafo->V) {
+                        visitado[aux->destino] = 1;
+                        distancia[aux->destino] = distancia[vert] + 1;
+                        fila[fim++] = aux->destino;
+                    }
                 }
                 aux = aux->prox;
             }
