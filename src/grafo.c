@@ -103,8 +103,6 @@
             return;
         //chama a função auxiliar
         inserirOrdenado(&grafo->lista[origem], novo);
-        //atualiza o número de arestas
-        grafo->A++;
     }
 
     //adiciona uma aresta bidirecional (origem <-> destino)
@@ -123,8 +121,6 @@
         //chama a função auxiliar
         inserirOrdenado(&grafo->lista[origem], novoDestino);
         inserirOrdenado(&grafo->lista[destino], novoOrigem);
-        //atualiza o número de arestas
-        grafo->A++;
     }
 
     //Lê o grafo do arquivo.txt
