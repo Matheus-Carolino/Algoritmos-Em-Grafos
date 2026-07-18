@@ -31,11 +31,11 @@
         grafo->V = vertices;
         grafo->A = arestas;
 
-        //Aloca o array de listas (indexado de 0 até V - 1)
-        grafo->lista = (No**)malloc((vertices) * sizeof(No*));
+        //Aloca o array de listas (indexado de 1 até V)
+        grafo->lista = (No**)malloc((vertices + 1) * sizeof(No*));
 
         //Inicializa todas as listas como vazias
-        for (int i = 0; i < vertices; i++) {
+        for (int i = 0; i <= vertices; i++) {
             grafo->lista[i] = NULL;
         }
         return grafo;
@@ -49,6 +49,132 @@
         //Insere o novo nó no início da lista do vértice de origem
         novo->prox = grafo->lista[origem];
         grafo->lista[origem] = novo;
+    }
+
+    // --- Funções de busca ---
+    // Realiza uma busca em profundidade (DFS) de forma recursiva
+    void DFSRecursiva(Grafo* grafo, int origem, int *visitado) {
+        // Verifica se o grafo é válido
+        if (grafo == NULL)
+            return;
+
+        // Marca o vértice atual como visitado e o imprime
+        visitado[origem] = 1;
+        printf("%d ", origem);
+
+        // Percorre todos os vértices adjacentes
+        No* atual = grafo->lista[origem];
+        while (atual != NULL) {
+            // Visita recursivamente os vértices não visitados
+            if (!visitado[atual->destino]) {
+                printf("-> ");
+                DFSRecursiva(grafo, atual->destino, visitado);
+            }
+            atual = atual->prox;
+        }
+    }
+
+    // Realiza uma busca em profundidade (DFS) de forma iterativa
+    void DFSIterativa(Grafo* grafo, int origem, int* visitado) {
+        // Verifica se o grafo é válido
+        if (grafo == NULL)
+            return;
+
+        // Inicializa a pilha auxiliar
+        int pilha[grafo->V];
+        int topo = -1;
+
+        // Empilha o vértice de origem
+        pilha[++topo] = origem;
+        visitado[origem] = 1;
+
+        printf("%d ", origem);
+
+        // Enquanto houver vértices na pilha
+        while (topo != -1) {
+            // Faça destino o vértice no topo da pilha
+            int destino = pilha[topo];
+
+            No* atual = grafo->lista[destino];
+            int encontrou = 0;
+
+            // Procura o primeiro vizinho ainda não visitado
+            while (atual != NULL) {
+                if (!visitado[atual->destino]) {
+                    visitado[atual->destino] = 1;
+                    pilha[++topo] = atual->destino;
+
+                    printf("-> %d ", atual->destino);
+
+                    encontrou = 1;
+                    // Quando encontrar o primeiro vizinho, encerra o laço
+                    break;
+                }
+
+                atual = atual->prox;
+            }
+
+            // Se não encontrou vizinhos não visitados
+            if (!encontrou)
+                topo--;
+        }
+    }
+
+    // Identifica os componentes conexos do grafo utilizando DFS recursiva
+    // Obs.: Funciona apenas para grafos não direcionados
+    void DFSRecCompConexos(Grafo* grafo) {
+        // Verifica se o grafo é válido
+        if (grafo == NULL)
+            return;
+
+        // Inicializa o vetor para controlar os vértices visitados
+        int visitado[grafo->V];
+        for (int i = 0; i < grafo->V; i++)
+            visitado[i] = 0;
+
+
+        // Contador para numerar os componentes conexos
+        int contador = 1;
+
+        printf("=== DFS RECURSIVA ===\n");
+
+        // Percorre todos os vértices do grafo
+        for (int i = 0; i < grafo->V; i++) {
+            // Inicia uma nova DFS caso o vértice ainda não tenha sido visitado
+            if (!visitado[i] && grafo->lista[i] != NULL) {
+                printf("Componente %d: ", contador++);
+                DFSRecursiva(grafo, i, visitado);
+                printf("\n");
+            }
+        }
+    }
+
+    // Identifica os componentes conexos do grafo utilizando DFS iterativa
+    // Obs.: Funciona apenas para grafos não direcionados
+    void DFSIteCompConexos(Grafo* grafo) {
+        // Verifica se o grafo é válido
+        if (grafo == NULL)
+            return;
+
+        // Inicializa o vetor para controlar dos vértices visitados
+        int visitado[grafo->V];
+        for (int i = 0; i < grafo->V; i++)
+            visitado[i] = 0;
+
+        // Contador para numerar os componentes conexos
+        int contador = 1;
+
+        printf("=== DFS ITERATIVA ===\n");
+
+        // Percorre todos os vértices do grafo
+        for (int i = 0; i < grafo->V; i++) {
+            // Inicia uma nova DFS caso o vértice ainda não tenha sido visitado
+            if (!visitado[i] && grafo->lista[i] != NULL) {
+                printf("Componente %d: ", contador++);
+                DFSIterativa(grafo, i, visitado);
+                printf("\n");
+            }
+        }
     }
 
     // Busca em largura (BFS)

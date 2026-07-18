@@ -10,6 +10,11 @@
 
     //Assinatura das funções principais dos grafos
     void adicionarAresta(Grafo *grafo, int origem, int destino, int peso);
+
+    void DFSRecursiva(Grafo* grafo, int origem, int *visitado);
+    void DFSRecCompConexos(Grafo* grafo);
+    void DFSIterativa(Grafo* grafo, int origem, int* visitado);
+    void DFSIteCompConexos(Grafo* grafo);
     void BFS(Grafo *grafo, int vertice);
 
 #endif //GRAFOS_GRAFO_H
