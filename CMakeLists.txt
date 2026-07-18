@@ -11,4 +11,6 @@ add_executable(grafos
         src/main.c
         include/grafo.h
         src/grafo.c
+        include/validacao.h
+        src/validacao.c
 )
