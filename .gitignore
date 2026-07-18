@@ -1,0 +1,11 @@
+# Arquivos do CLion e CMake
+.idea/
+cmake-build-degub/
+cmake-build-release/
+build/
+
+# Arquivos compilados e executáveis
+*.o
+*.obj
+*.out
+*.exe
