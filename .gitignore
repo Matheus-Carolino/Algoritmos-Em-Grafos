@@ -1,6 +1,5 @@
-# Arquivos do CLion, CMake e VSCode
+# Arquivos do CLion e CMake
 .idea/
-.vscode/
 cmake-build-degub/
 cmake-build-release/
 build/
