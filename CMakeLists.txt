@@ -9,4 +9,8 @@ include_directories(include)
 # Adicione todos os arquivos .c dentro de src aqui
 add_executable(grafos
         src/main.c
+        include/grafo.h
+        src/grafo.c
+        include/validacao.h
+        src/validacao.c
 )
