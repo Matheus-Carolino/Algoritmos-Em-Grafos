@@ -18,4 +18,6 @@
     void DFSIteCompConexos(Grafo* grafo);
     void BFS(Grafo *grafo, int vertice);
 
+    void ordemTopologica (Grafo *grafo)
+
 #endif //GRAFOS_GRAFO_H
