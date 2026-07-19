@@ -11,6 +11,7 @@
     No* criarNo(int destino, int peso);
     Grafo* criarGrafo(int vertices, int arestas);
     void liberarGrafo(Grafo *grafo);
+    void mostrarGrafo(Grafo *grafo);
     void inserirOrdenado(No** lista, No* novo);
 
     //Assinatura das funções principais dos grafos

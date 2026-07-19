@@ -11,7 +11,7 @@
         while (*string) {
             printf("%c", *string);
             string++;
-            SLEEP_MS(1);
+            //SLEEP_MS(1);
         }
         printf("┃\n");
     }
@@ -21,7 +21,7 @@
             if (i == 0) printf("┏");
             else if (i == n - 1) printf("┓");
             else printf("━");
-            SLEEP_MS(1);
+            //SLEEP_MS(1);
         }
         printf("\n");
     }
@@ -31,7 +31,7 @@
             if (i == 0) printf("┗");
             else if (i == n - 1) printf("┛");
             else printf("━");
-            SLEEP_MS(1);
+            //SLEEP_MS(1);
         }
         printf("\n");
     }
@@ -90,8 +90,9 @@
                     imprimirMensagemGrafo(status);
                     break;
 
-                case 2: printf("\n[Mock] Exibindo Grafo...\n"); break;
-
+                case 2:
+                    mostrarGrafo(grafo);
+                    break;
                 case 3:
                     char op;
                     int visitado[] = {0};

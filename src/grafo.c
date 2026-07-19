@@ -71,6 +71,28 @@
         free(grafo);
     }
 
+    void mostrarGrafo(Grafo *grafo) {
+        // Tratamento de erro para ponteiro nulo
+        if (grafo == NULL)
+            return;
+
+        printf("=== GRAFO ===\n\n");
+
+        No* atual = NULL;
+        for (int i=0; i<grafo->V; i++) {
+            // Se a lista de vértices não está vazia
+            if (grafo->lista[i] != NULL){
+                printf("Vertice %d: ", i);
+                atual = grafo->lista[i];
+                while (atual->prox != NULL) {
+                    printf("%d -> ", atual->destino);
+                    atual = atual->prox;
+                }
+                printf("%d \n",atual->destino);
+            }
+        }
+    }
+
     //função auxiliar para inserir arestas ordendas na lista
     void inserirOrdenado(No** lista, No* novo) {
         //Evita operações em ponteiros nulos
@@ -84,7 +106,7 @@
             atual = atual->prox;
         }
         //Caso 1: Inserção no início da lista (lista vazia ou menor elemento)
-        if (atual == NULL) {
+        if (ant == NULL) {
             novo->prox = *lista;
             *lista = novo;
         }
