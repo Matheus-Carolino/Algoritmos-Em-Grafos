@@ -18,12 +18,16 @@
     void adicionarArestaBidirecionada(Grafo *grafo, int origem, int destino, int peso);
     GrafoStatus lerGrafoDeArquivo(const char* nomeArquivo, Grafo** grafo);
 
-    void DFSRecursiva(Grafo* grafo, int origem, int *visitado);
-    void DFSRecCompConexos(Grafo* grafo);
-    void DFSIterativa(Grafo* grafo, int origem, int* visitado);
-    void DFSIteCompConexos(Grafo* grafo);
-    void BFS(Grafo *grafo, int vertice);
+    //Assinatura das funções de busca em profundidade (DFS)
+    GrafoStatus DFSRecursiva(Grafo* grafo, int origem, int *visitado);
+    GrafoStatus DFSRecCompConexos(Grafo* grafo);
+    GrafoStatus DFSIterativa(Grafo* grafo, int origem, int* visitado);
+    GrafoStatus DFSIteCompConexos(Grafo* grafo);
 
-    void ordemTopologica (Grafo *grafo)
+    //Assinatura da função de busca em largura (BFS)
+    GrafoStatus BFS(Grafo *grafo, int vertice);
+
+    //Assinatura da função de ordem topológica
+    GrafoStatus ordemTopologica(Grafo *grafo);
 
 #endif //GRAFOS_GRAFO_H

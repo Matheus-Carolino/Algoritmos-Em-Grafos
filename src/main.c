@@ -1,5 +1,4 @@
 #include <stdio.h>
-
 #include "validacao.h"
 #include "grafo.h"
 
@@ -10,7 +9,6 @@ int main(void) {
 
     status = lerGrafoDeArquivo("../data/grafo.txt", &grafo);
     imprimirMensagemGrafo(status);
-
     liberarGrafo(grafo);
     return 0;
 }
