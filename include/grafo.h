@@ -1,6 +1,6 @@
 #ifndef GRAFOS_GRAFO_H
 #define GRAFOS_GRAFO_H
-
+    #include <stdbool.h>
     #include "validacao.h"
 
     //typedef das structs usadas
@@ -29,5 +29,30 @@
 
     //Assinatura da função de ordem topológica
     GrafoStatus ordemTopologica(Grafo *grafo);
+
+    //Assinatura dos algoritmos de Prim e Dijkstra
+    GrafoStatus algoritmoPrim(Grafo* g);
+    GrafoStatus algoritmoDijkstra(Grafo *grafo, int origem);
+
+    // --- Funções para Estatisticas dos Grafos ---
+    //Verifica se o grafo é direcionado
+    bool isDirecionado(Grafo *grafo);
+
+    //Auxiliares e função para detectar ciclos por DFS (cores)
+    bool dfsCiclo(Grafo *grafo, int i, int *cor, int pai, bool direcionado);
+    bool temCiclo(Grafo *grafo, bool direcionado);
+
+    //Auxiliares e função principal para verificar se o grafo é conexo
+    void dfsConexo(Grafo *grafo, int i, bool *visitado);
+    bool isConexo(Grafo *grafo);
+
+    //Calcula a densidade do grafo
+    float calcularDensidade(Grafo *grafo, bool direcionado);
+
+    //Calcula e imprime os graus de cada vértice baseado no tipo de grafo
+    void calcularImprimirGraus(Grafo *grafo, bool direcionado);
+
+    //Executor de tudo que foi pedido da opção 8
+    void exibirEstatisticas(Grafo *grafo);
 
 #endif //GRAFOS_GRAFO_H

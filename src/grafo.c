@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
+
 #include "grafo.h"
 #include "validacao.h"
 
@@ -16,7 +18,7 @@
     };
 
     //--- Funções Auxiliares ---
-    //Criar um novo Nó com alocação dinâmica
+    //Cria um novo Nó com alocação dinâmica
     No* criarNo(int destino, int peso) {
         No *novo = (No*)malloc(sizeof(No));
         novo->destino = destino;
@@ -392,113 +394,479 @@
         return GRAFO_OK;
     }
 
+    // Ordenação Topologica do Grafo
     GrafoStatus ordemTopologica(Grafo *grafo) {
-    // Verifica se o grafo é válido
-    if (grafo == NULL || grafo->lista == NULL) {
-        return ERRO_MEMORIA_INSUFICIENTE;
-    }
+        // Verifica se o grafo é válido
+        if (grafo == NULL || grafo->lista == NULL)
+            return ERRO_MEMORIA_INSUFICIENTE;
 
-    int V = grafo->V;
+        int V = grafo->V;
 
-    // Aloca e zera o vetor que guardará a quantidade de arestas que chegam a cada vértice
-    int *grauEntrada = (int*)calloc(V, sizeof(int));
+        // Aloca e zera o vetor que guardará a quantidade de arestas que chegam a cada vértice
+        int *grauEntrada = (int*)calloc(V, sizeof(int));
 
-    // Aloca o vetor que funcionará como uma fila estática para armazenar os vértices prontos para processamento
-    int *fila = (int*)malloc(V * sizeof(int));
+        // Aloca o vetor que funcionará como uma fila estática para armazenar os vértices prontos para processamento
+        int *fila = (int*)malloc(V * sizeof(int));
 
-    if (grauEntrada == NULL || fila == NULL) {
+        if (grauEntrada == NULL || fila == NULL) {
+            free(grauEntrada);
+            free(fila);
+            return ERRO_MEMORIA_INSUFICIENTE;
+        }
+
+        // Ponteiros de controle da fila
+        int inicio = 0;
+        int fim = 0;
+
+        // Contador para verificar a presença de ciclos ao fim da execução
+        int verticesProcessados = 0;
+
+        // Calcula o grau de entrada de cada vértice mapeando a lista de adjacência
+        for (int i = 0; i < V; i++) {
+            No* atual = grafo->lista[i];
+            while (atual != NULL) {
+                // Garante que o vértice de destino está dentro dos limites válidos do grafo
+                if (atual->destino >= 0 && atual->destino < V)
+                    grauEntrada[atual->destino]++;
+                atual = atual->prox;
+            }
+        }
+
+        // Inicializa a fila com todos os vértices que não possuem dependências de entrada (grau == 0)
+        for (int i = 0; i < V; i++) {
+            if (grauEntrada[i] == 0)
+                fila[fim++] = i;
+        }
+
+        printf("\n=== ORDENACAO TOPOLOGICA ===\n");
+        printf("Ordem: ");
+
+        // Processa a fila utilizando uma variação do Algoritmo de Kahn
+        while (inicio < fim) {
+            // Desenfileira o próximo vértice da fila
+            int u = fila[inicio++];
+
+            printf("%d", u);
+            verticesProcessados++;
+
+            if (verticesProcessados < V)
+                printf(" -> ");
+
+            // Atualiza o impacto da remoção do vértice 'u' sobre os seus vizinhos adjacentes
+            No* atual = grafo->lista[u];
+            while (atual != NULL) {
+                int v = atual->destino;
+                grauEntrada[v]--;
+
+                if (grauEntrada[v] == 0) {
+                    /*
+                     * Inserção ordenada customizada na fila:
+                     * Mantém a fila interna ordenada de forma decrescente para priorizar vértices
+                     * de maior valor em cenários de desempate
+                     */
+                    int inserido = 0;
+
+                    // Varre a porção ativa da fila (elementos ainda não processados) buscando a posição correta
+                    for (int i = inicio; i < fim; i++) {
+                        if (v > fila[i]) {
+                            // Desloca os elementos subsequentes para a direita a fim de abrir espaço para o vértice 'v'
+                            for (int j = fim; j > i; j--)
+                                fila[j] = fila[j-1];
+                            fila[i] = v;     // Insere o vértice na posição correta encontrada
+                            inserido = 1;    // Sinaliza que a inserção prioritária foi concluída
+                            break;           // Interrompe a busca de posição
+                        }
+                    }
+
+                    // Caso não precise ser inserido no meio (menor prioridade atual), adiciona normalmente ao final da fila
+                    if (!inserido)
+                        fila[fim] = v;
+                    fim++;
+                }
+                atual = atual->prox;
+            }
+        }
+        printf("\n");
+
+        // Verificação de Ciclos
+        if (verticesProcessados < V)
+            printf("O grafo possui pelo menos um ciclo. A ordenacao acima esta incompleta.\n");
+
         free(grauEntrada);
         free(fila);
-        return ERRO_MEMORIA_INSUFICIENTE;
+
+        return GRAFO_OK;
     }
 
-    // Ponteiros de controle da fila
-    int inicio = 0;
-    int fim = 0;
+    // Árvore Geradora Mínima (AGM) utilizando o Algoritmo de Prim.
+    GrafoStatus algoritmoPrim(Grafo* g) {
+        // Verifica se o grafo é válido
+        if (g == NULL || g->lista == NULL)
+            return ERRO_MEMORIA_INSUFICIENTE;
 
-    // Contador para verificar a presença de ciclos ao fim da execução
-    int verticesProcessados = 0;
+        int V = g->V;
 
-    // Calcula o grau de entrada de cada vértice mapeando a lista de adjacência
-    for (int i = 0; i < V; i++) {
-        No* atual = grafo->lista[i];
-        while (atual != NULL) {
-            // Garante que o vértice de destino está dentro dos limites válidos do grafo
-            if (atual->destino >= 0 && atual->destino < V) {
-                grauEntrada[atual->destino]++;
-            }
-            atual = atual->prox;
-        }
-    }
+        // Alocação dos vetores auxiliares para construção da AGM
+        int* pai = (int*)malloc(V * sizeof(int));   // Armazena a aresta que conecta o vértice à árvore
+        int* chave = (int*)malloc(V * sizeof(int)); // Guarda o menor peso de aresta para conectar o vértice à AGM
+        int* naAGM = (int*)calloc(V, sizeof(int));  // Mapeia se o vértice já foi incluído na árvore (0 = não, 1 = sim)
 
-    // Inicializa a fila com todos os vértices que não possuem dependências de entrada (grau == 0)
-    for (int i = 0; i < V; i++) {
-        if (grauEntrada[i] == 0) {
-            fila[fim++] = i;
-        }
-    }
-
-    printf("\n=== ORDENACAO TOPOLOGICA ===\n");
-    printf("Ordem: ");
-
-    // Processa a fila utilizando uma variação do Algoritmo de Kahn
-    while (inicio < fim) {
-        // Desenfileira o próximo vértice da fila
-        int u = fila[inicio++];
-
-        printf("%d", u);
-        verticesProcessados++;
-
-        if (verticesProcessados < V) {
-            printf(" -> ");
+        // Verifica se o grafo é válido
+        if (pai == NULL || chave == NULL || naAGM == NULL) {
+            free(pai);
+            free(chave);
+            free(naAGM);
+            return ERRO_MEMORIA_INSUFICIENTE;
         }
 
-        // Atualiza o impacto da remoção do vértice 'u' sobre os seus vizinhos adjacentes
-        No* atual = grafo->lista[u];
-        while (atual != NULL) {
-            int v = atual->destino;
-            grauEntrada[v]--;
+        // Inicialização dos vetores de controle
+        for (int i = 0; i < V; i++) {
+            chave[i] = INT_MAX; // Define "infinito" como peso inicial
+            pai[i] = -1;        // -1 indica que nenhum pai ou conexão foi definida ainda
+        }
 
-            if (grauEntrada[v] == 0) {
+        // Acumulador para calcular a soma total dos pesos de todas as arestas da AGM
+        int peso_total_componentes = 0;
 
-                /*
-                 * Inserção ordenada customizada na fila:
-                 * Mantém a fila interna ordenada de forma decrescente para priorizar vértices
-                 * de maior valor em cenários de desempate
-                 */
-                int inserido = 0;
+        printf("\n=== ÁRVORE GERADORA MÍNIMA (PRIM) ===\n");
 
-                // Varre a porção ativa da fila (elementos ainda não processados) buscando a posição correta
-                for (int i = inicio; i < fim; i++) {
-                    if (v > fila[i]) {
-                        // Desloca os elementos subsequentes para a direita a fim de abrir espaço para o vértice 'v'
-                        for (int j = fim; j > i; j--) {
-                            fila[j] = fila[j-1];
-                        }
-                        fila[i] = v;     // Insere o vértice na posição correta encontrada
-                        inserido = 1;    // Sinaliza que a inserção prioritária foi concluída
-                        break;           // Interrompe a busca de posição
+        // Loop externo para garantir que todos os componentes conexos isolados do grafo sejam processados
+        for (int raiz = 0; raiz < V; raiz++) {
+            // Se o vértice já foi processado e incluído em uma AGM anterior, ignora
+            if (naAGM[raiz]) continue;
+
+            // O vértice escolhido como raiz do componente inicia com peso zero para ser selecionado primeiro
+            chave[raiz] = 0;
+
+            // Loop principal para processar e expandir os vértices do componente atual
+            for (int count = 0; count < V; count++) {
+                int u = -1;
+                int min = INT_MAX;
+
+                // Encontra o vértice fora da AGM que possui a menor chave de conexão atual
+                for (int v = 0; v < V; v++) {
+                    if (!naAGM[v] && chave[v] < min) {
+                        min = chave[v];
+                        u = v;
                     }
                 }
 
-                // Caso não precise ser inserido no meio (menor prioridade atual), adiciona normalmente ao final da fila
-                if (!inserido) {
-                    fila[fim] = v;
+                // Se não encontrar nenhum vértice acessível restante, o componente atual foi completamente processado
+                if (u == -1) break;
+
+                // Inclui formalmente o vértice 'u' na Árvore Geradora Mínima
+                naAGM[u] = 1;
+
+                // Se o vértice possui um pai associado, significa que uma aresta válida da AGM foi fechada
+                if (pai[u] != -1) {
+                    peso_total_componentes += chave[u]; // Acumula o peso da aresta no custo total
+                    printf("Aresta: %d - %d | Peso: %d\n", pai[u], u, chave[u]);
                 }
-                fim++;
+
+                // Atualiza as chaves de corte e os pais de todos os vizinhos adjacentes ao vértice 'u' recém-incluído
+                No* adj = g->lista[u];
+                while (adj != NULL) {
+                    int v = adj->destino;
+                    int peso = adj->peso;
+
+                    // Se o vizinho está fora da AGM e o peso desta nova aresta
+                    // for menor do que a menor chave registrada anteriormente para ele, atualiza o vínculo
+                    if (!naAGM[v] && peso < chave[v]) {
+                        pai[v] = u;       // Define 'u' como o melhor ponto de conexão para o vértice 'v'
+                        chave[v] = peso;  // Atualiza o custo de entrada para este novo menor peso encontrado
+                    }
+                    adj = adj->prox; // Avança para o próximo vizinho na lista de adjacência
+                }
+            }
+        }
+
+        printf("=====================================\n");
+        printf("Peso Total da AGM: %d\n", peso_total_componentes); // Exibe o peso consolidado de toda a estrutura
+        printf("=====================================\n");
+
+        // Liberação segura de todas as memórias locais alocadas
+        free(pai);
+        free(chave);
+        free(naAGM);
+
+        return GRAFO_OK;
+    }
+
+    //Algoritmo de Dijkstra para Caminhos Mínimos.
+    GrafoStatus algoritmoDijkstra(Grafo *grafo, int origem) {
+        // Verifica se o grafo é válido
+        if (grafo == NULL || grafo->lista == NULL)
+            return ERRO_MEMORIA_INSUFICIENTE;
+
+        int qtdVer = grafo->V;
+
+        // Validação do parâmetro de origem com base nos limites do grafo
+        if (origem < 0 || origem >= qtdVer)
+            return ERRO_VERTICE_INVALIDO;
+
+        // Alocação dos vetores auxiliares para o cálculo do caminho mínimo
+        int *dist = (int*)malloc(qtdVer * sizeof(int));
+        int *antecessor = (int*)malloc(qtdVer * sizeof(int));
+        int *visitado = (int*)calloc(qtdVer, sizeof(int));
+
+        // Validação de alocação de memória para os vetores locais
+        if (dist == NULL || antecessor == NULL || visitado == NULL) {
+            free(dist);
+            free(antecessor);
+            free(visitado);
+            return ERRO_MEMORIA_INSUFICIENTE;
+        }
+
+        // Inicialização das distâncias estimadas e dos antecessores
+        for (int i = 0; i < qtdVer; i++) {
+            dist[i] = INT_MAX;     // Define infinito como distância inicial
+            antecessor[i] = -1;    // -1 indica que não há antecessor definido
+        }
+        dist[origem] = 0;          // A distância da origem para ela mesma é zero
+
+        for (int i = 0; i < qtdVer - 1; i++) {
+            int min = INT_MAX;
+            int u = -1;
+
+            // Encontra o vértice com a menor distância estimada que ainda não foi visitado
+            for (int v = 0; v < qtdVer; v++) {
+                if (!visitado[v] && dist[v] < min) {
+                    min = dist[v];
+                    u = v;
+                }
+            }
+
+            // Se os vértices restantes forem inacessíveis a partir da origem, interrompe o laço
+            if (u == -1) break;
+
+            // Marca o vértice selecionado como visitado (fechado)
+            visitado[u] = 1;
+
+            // Relaxamento das arestas adjacentes do vértice 'u'
+            No *adj = grafo->lista[u];
+            while (adj != NULL) {
+                int v = adj->destino;
+                int peso = adj->peso;
+
+                // Se o vizinho não foi visitado e o caminho por 'u' for menor do que o anteriormente registrado
+                if (!visitado[v] && dist[u] != INT_MAX && dist[u] + peso < dist[v]) {
+                    dist[v] = dist[u] + peso; // Atualiza a menor distância
+                    antecessor[v] = u;        // Define 'u' como o caminho de chegada para 'v'
+                }
+                adj = adj->prox; // Avança para o próximo vizinho na lista de adjacência
+            }
+        }
+
+        // Exibição dos resultados
+        printf("\n=== DIJKSTRA (Origem: %d) ===\n", origem);
+        printf("Vertice | Distancia | Caminho\n");
+        printf("--------|-----------|------------------\n");
+
+        // Aloca uma pilha temporária para inverter e reconstruir a ordem do caminho de cada vértice
+        int *caminhoAux = (int*)malloc(qtdVer * sizeof(int));
+        if (caminhoAux == NULL) {
+            free(dist);
+            free(antecessor);
+            free(visitado);
+            return ERRO_MEMORIA_INSUFICIENTE;
+        }
+
+        for (int i = 0; i < qtdVer; i++) {
+
+            if (dist[i] == INT_MAX) {
+                printf("%-7d | Infinito  | -\n", i);
+            } else {
+                printf("%-7d | %-9d | ", i, dist[i]);
+
+                // Reconstrói o caminho de trás para frente (do vértice alvo até a origem)
+                int tam = 0;
+                int atual = i;
+                while (atual != -1) {
+                    caminhoAux[tam++] = atual;
+                    atual = antecessor[atual];
+                }
+
+                // Desempilha e imprime o caminho na ordem correta
+                for (int j = tam - 1; j >= 0; j--) {
+                    printf("%d", caminhoAux[j]);
+                    if (j > 0) {
+                        printf(" -> ");
+                    }
+                }
+                printf("\n");
+            }
+        }
+
+        // Liberação segura de todas as memórias alocadas localmente
+        free(caminhoAux);
+        free(dist);
+        free(antecessor);
+        free(visitado);
+
+        return GRAFO_OK;
+    }
+
+    // --- Funções para Estatisticas dos Grafos ---
+    //Verifica se o grafo é direcionado
+    bool isDirecionado(Grafo *grafo) {
+        if (grafo == NULL) return false;
+
+        for (int i = 0; i < grafo->V; i++) {
+            No *atual = grafo->lista[i];
+            while (atual != NULL) {
+                int v = atual->destino;
+                bool temVolta = false;
+
+                No *reverso = grafo->lista[v];
+                while (reverso != NULL) {
+                    if (reverso->destino == i) {
+                        temVolta = true;
+                        break;
+                    }
+                    reverso = reverso->prox;
+                }
+                if (!temVolta) return true;
+
+                atual = atual->prox;
+            }
+        }
+        return false;
+    }
+
+    //Auxiliares e função para detectar ciclos por DFS (cores)
+    bool dfsCiclo(Grafo *grafo, int i, int *cor, int pai, bool direcionado) {
+        cor[i] = 1;
+        No *atual = grafo->lista[i];
+
+        while (atual != NULL) {
+            int v = atual->destino;
+            if (cor[v] == 1) {
+                if (!direcionado && v == pai) {
+                    atual = atual->prox;
+                    continue;
+                }
+                return true; // Encontrou uma aresta de volta para um nó em processamento
+            }
+
+            if (cor[v] == 0 && dfsCiclo(grafo, v, cor, i, direcionado)) {
+                return true;
+            }
+            atual = atual->prox;
+        }
+        cor[i] = 2; // 2 = Totalmente processado (Preto)
+        return false;
+    }
+
+    bool temCiclo(Grafo *grafo, bool direcionado) {
+        if (grafo == NULL || grafo->V == 0) return false;
+
+        int *cor = (int*) calloc(grafo->V, sizeof(int));
+        for (int i = 0; i < grafo->V; i++) {
+            if (cor[i] == 0) {
+                if (dfsCiclo(grafo, i, cor, -1, direcionado)) {
+                    free(cor);
+                    return true;
+                }
+            }
+        }
+        free(cor);
+        return false;
+    }
+
+    //Auxiliares e função principal para verificar se o grafo é conexo
+    void dfsConexo(Grafo *grafo, int i, bool *visitado) {
+        visitado[i] = true;
+        No *atual = grafo->lista[i];
+        while (atual != NULL) {
+            if (!visitado[atual->destino]) {
+                dfsConexo(grafo, atual->destino, visitado);
             }
             atual = atual->prox;
         }
     }
-    printf("\n");
 
-    // Verificação de Ciclos
-    if (verticesProcessados < V) {
-        printf("O grafo possui pelo menos um ciclo. A ordenacao acima esta incompleta.\n");
+    bool isConexo(Grafo *grafo) {
+        if (grafo == NULL || grafo->V == 0) return false;
+
+        bool *visitado = (bool*) calloc(grafo->V, sizeof(bool));
+        // Dispara a busca a partir do primeiro vértice (0)
+        dfsConexo(grafo, 0, visitado);
+
+        // Se algum vértice não foi alcançado, o grafo é desconexo
+        for (int i = 0; i < grafo->V; i++) {
+            if (!visitado[i]) {
+                free(visitado);
+                return false;
+            }
+        }
+        free(visitado);
+        return true;
     }
 
-    free(grauEntrada);
-    free(fila);
+    //Calcula a densidade do grafo
+    float calcularDensidade(Grafo *grafo, bool direcionado) {
+        if (grafo == NULL || grafo->V <= 1) return 0.0;
 
-    return GRAFO_OK;
-}
+        if (direcionado) {
+            return (float)grafo->A / (grafo->V * (grafo->V - 1));
+        }
+        return (float)grafo->A / ((grafo->V * (grafo->V - 1)) / 2.0);
+    }
+
+    //Calcula e imprime os graus de cada vértice baseado no tipo de grafo
+    void calcularImprimirGraus(Grafo *grafo, bool direcionado) {
+        if (grafo == NULL) return;
+
+        int *grauEntrada = (int*) calloc(grafo->V, sizeof(int));
+        int *grauSaida = (int*) calloc(grafo->V, sizeof(int));
+
+        for (int u = 0; u < grafo->V; u++) {
+            No *atual = grafo->lista[u];
+            while (atual != NULL) {
+                grauSaida[u]++;
+                grauEntrada[atual->destino]++;
+                atual = atual->prox;
+            }
+        }
+
+        printf("- Grau de cada vertice:\n");
+        for (int i = 0; i < grafo->V; i++) {
+            if (direcionado) {
+                printf("  Vertice %d: Grau de Entrada = %d | Grau de Saida = %d\n", i, grauEntrada[i], grauSaida[i]);
+            } else {
+                printf("  Vertice %d: Grau = %d\n", i, grauSaida[i]);
+            }
+        }
+        free(grauEntrada);
+        free(grauSaida);
+    }
+
+    //Executor de tudo que foi pedido da opção 8
+    void exibirEstatisticas(Grafo *grafo) {
+        if (grafo == NULL) {
+            printf("Erro: Nenhum grafo carregado na memoria.\n");
+            return;
+        }
+
+        printf("\n=====================================");
+        printf("\n===  OPCAO 8 - ESTATISTICAS DO GRAFO ===");
+        printf("\n=====================================\n");
+
+        printf("- Numero de vertices: %d\n", grafo->V);
+        printf("- Numero de arestas: %d\n", grafo->A);
+
+        bool direcionado = isDirecionado(grafo);
+        printf("- Tipo de grafo: %s\n", direcionado ? "Direcionado (Digrafo)" : "Nao-direcionado");
+
+        calcularImprimirGraus(grafo, direcionado);
+
+        bool conexo = isConexo(grafo);
+        printf("- Conectividade: %s\n", conexo ? "CONEXO" : "DESCONEXO");
+
+        bool ciclos = temCiclo(grafo, direcionado);
+        printf("- Presenca de ciclos: %s\n", ciclos ? "SIM, contem ciclos" : "NAO possui ciclos (Aciclico)");
+
+        float densidade = calcularDensidade(grafo, direcionado);
+        printf("- Densidade do grafo: %.4f\n", densidade);
+        printf("=====================================\n");
+    }
