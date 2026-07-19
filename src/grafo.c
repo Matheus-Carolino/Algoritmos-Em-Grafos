@@ -35,7 +35,7 @@
         grafo->V = vertices;
         grafo->A = arestas;
 
-        //Aloca o array de listas (indexado de 1 até V - 1)
+        //Aloca o array de listas (indexado de 0 até V - 1)
         grafo->lista = (No**)malloc((vertices) * sizeof(No*));
         if (grafo->lista == NULL) {
             free(grafo);
@@ -496,7 +496,6 @@
     if (verticesProcessados < V) {
         printf("O grafo possui pelo menos um ciclo. A ordenacao acima esta incompleta.\n");
     }
-
 
     free(grauEntrada);
     free(fila);

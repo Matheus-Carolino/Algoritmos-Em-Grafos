@@ -19,6 +19,9 @@
             case ERRO_ARESTA_INVALIDA:
                 printf("Erro: Uma ou mais arestas possuem vertices invalidos!\n");
                 break;
+            case ERRO_VERTICE_INVALIDO:
+                printf("Erro: Uma ou mais vertices possuem vertices invalidos!\n");
+                break;
             case ERRO_MEMORIA_INSUFICIENTE:
                 printf("Erro: Falha ao alocar memória para o grafo!\n");
                 break;

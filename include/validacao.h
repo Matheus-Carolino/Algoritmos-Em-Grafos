@@ -7,8 +7,8 @@
         ERRO_FORMATO_INVALIDO,
         ERRO_NUMERO_INVALIDO,
         ERRO_ARESTA_INVALIDA,
-        ERRO_MEMORIA_INSUFICIENTE,
-        ERRO_VERTICE_INVALIDO
+        ERRO_VERTICE_INVALIDO,
+        ERRO_MEMORIA_INSUFICIENTE
     } GrafoStatus;
 
 void imprimirMensagemGrafo(GrafoStatus status);
