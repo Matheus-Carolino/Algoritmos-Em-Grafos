@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <limits.h>
 
 #include "grafo.h"
 #include "validacao.h"
@@ -891,4 +892,177 @@
         float densidade = calcularDensidade(grafo, direcionado);
         printf("- Densidade do grafo: %.4f\n", densidade);
         printf("=====================================\n");
+    }
+
+
+    //funções extras
+
+    GrafoStatus caminhoCritico (Grafo *grafo) {
+        if (grafo == NULL || grafo->V == 0) {
+            return ERRO_MEMORIA_INSUFICIENTE;
+        }
+        //Primeira Parte: Verificar se é um DAG
+        No* atual;
+        int zeroSetasApontando[grafo->V];
+        int setasApontando[grafo->V];
+        int inicio = 0;
+        int fim = 0;
+        int vertices = 0;
+        int temp = 0;
+        int zeros = 0;
+
+        //Segunda Parte : Achar o maior caminho
+        int maiorCaminho[grafo->V];
+        int peso = 0;
+        int maiorDistancia = 0;
+        for (int i = 0; i < grafo->V; i++) {
+            setasApontando[i] = 0;
+            zeroSetasApontando[i] = 0;
+            maiorCaminho[i] = 0;
+        }
+        for (int i = 0; i < grafo->V; i++) {
+            atual = grafo->lista[i];
+            while (atual != NULL) {
+                setasApontando[atual->destino]++;
+                atual = atual->prox;
+            }
+        }
+
+        for (int i = 0; i < grafo->V; i ++) {
+            if (setasApontando[i] == 0) {
+                zeroSetasApontando[fim] = i;
+                fim++;
+            }
+        }
+
+        while (inicio < fim) {
+            zeros = zeroSetasApontando[inicio];
+            vertices++;
+            atual = grafo->lista[zeros];
+            while (atual != NULL) {
+                temp = atual->destino;
+                setasApontando[temp]--;
+
+                if (setasApontando[temp] == 0) {
+                    zeroSetasApontando[fim] = temp;
+                    fim++;
+                }
+
+                atual = atual->prox;
+            }
+
+            inicio++;
+        }
+
+        if (vertices < grafo->V) {
+            printf("o grafo nao e DAGs\n");
+            return ERRO_FORMATO_INVALIDO; // ciclico;
+        }
+
+        for (int i = 0; i < grafo->V; i++) {
+            zeros = zeroSetasApontando[i];
+            atual = grafo->lista[zeros];
+            while(atual != NULL) {
+                temp = atual->destino;
+                peso = atual->peso;
+
+                if (maiorCaminho[zeros] + peso > maiorCaminho[temp]) {
+                    maiorCaminho[temp] = maiorCaminho[zeros] + peso;
+                }
+
+                atual = atual->prox;
+            }
+
+
+        }
+
+        maiorDistancia = maiorCaminho[0];
+        for (int i = 0; i < grafo->V; i++) {
+            if (maiorCaminho[i] > maiorDistancia) {
+                maiorDistancia = maiorCaminho[i];
+            }
+        }
+
+        printf("A maior distancia que pode ser percorrida nesse DAG é: %d", maiorDistancia);
+        return GRAFO_OK;
+    }
+
+
+    void DFSPilha (Grafo *grafo, int indice, int *visitados, int *pilha, int *sp) {
+        if (grafo == NULL) {
+            return;
+        }
+        int destino;
+        visitados[indice] = 1;
+        No* atual = grafo->lista[indice];
+        while (atual != NULL) {
+            destino = atual->destino;
+            if (!visitados[destino]) {
+                DFSPilha(grafo, destino,visitados, pilha, sp);
+            } 
+
+            atual = atual->prox;
+        }
+
+        pilha[++(*sp)] = indice;
+    }
+
+
+    Grafo* criarGrafoTransposto(Grafo *grafo) {
+        if (grafo == NULL || grafo->V == 0) {
+            return NULL;
+        }
+        Grafo* grafoTransposto = criarGrafo(grafo->V, grafo->A);
+        if (grafoTransposto == NULL) {
+            return NULL;
+        }
+        No *atual;
+        for (int i = 0; i < grafo->V;i++) {
+            atual = grafo->lista[i];
+            while (atual != NULL) {
+                adicionarArestaDirecionada(grafoTransposto, atual->destino,i, atual->peso);
+                atual = atual->prox;
+            }
+        }
+
+        return grafoTransposto;
+    }
+
+    GrafoStatus Kosaraju (Grafo *grafo) {
+        if (grafo == NULL) {
+            return ERRO_MEMORIA_INSUFICIENTE;
+        }
+        int cfc = 0;
+        int temp;
+        int* visitados = (int *) calloc (grafo->V, sizeof(int));
+        int pilha[grafo->V];
+        int sp = -1;
+        
+        for (int i = 0; i < grafo->V; i++) {
+            if (!visitados[i]) {
+                DFSPilha(grafo, i, visitados, pilha, &sp);
+            } 
+        }
+
+        for (int i = 0; i < grafo->V; i++) {
+            visitados[i] = 0;
+        }
+
+        Grafo* grafoTransposto = criarGrafoTransposto(grafo);
+
+        while (sp >= 0) {
+            temp = pilha[sp--];
+
+            if (!visitados[temp]){
+                cfc++;
+
+                printf("COMPONENTES FORTEMENTE CONECTADOS DE %d :", cfc);
+
+                DFSRecursiva(grafoTransposto, temp, visitados);
+            }
+
+            printf("\n");
+        }
+
+     return GRAFO_OK;   
     }

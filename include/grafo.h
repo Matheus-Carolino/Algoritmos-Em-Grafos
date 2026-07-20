@@ -56,4 +56,11 @@
     //Executor de tudo que foi pedido da opção 8
     void exibirEstatisticas(Grafo *grafo);
 
+
+    //funções extras
+    void DFSPilha (Grafo *grafo, int indice, int *visitados, int *pilha, int *sp);
+    Grafo* criarGrafoTransposto(Grafo *grafo);
+    GrafoStatus Kosaraju (Grafo *grafo);
+    GrafoStatus caminhoCritico (Grafo *grafo); 
+
 #endif //GRAFOS_GRAFO_H
