@@ -1,6 +1,6 @@
     #include "algoritmos.h"
 
-// --- Funções de busca ---
+    // --- Funções de busca ---
     // Realiza uma busca em profundidade (DFS) de forma recursiva
     GrafoStatus DFSRecursiva(Grafo* grafo, int origem, int *visitado) {
         // Verifica se o grafo é válido

@@ -1,6 +1,6 @@
 #include "estatisticas.h"
 
-// --- Funções para Estatisticas dos Grafos ---
+    // --- Funções para Estatisticas dos Grafos ---
     //Auxiliares e função para detectar ciclos por DFS (cores)
     bool dfsCiclo(Grafo *grafo, int i, int *cor, int pai, bool direcionado) {
         cor[i] = 1;

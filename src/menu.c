@@ -38,6 +38,8 @@
     }
 
     //--- Funções auxiliares do menu ---
+
+    // Carrega um grafo de arquivo, substituindo o grafo atualmente em memória (se houver)
     void carregarGrafoDeArquivo(Grafo** grafo) {
         char op;
         printf("\nO grafo a ser carregado é direcionado? (S | N)\n");
@@ -62,25 +64,30 @@
         if (grafo != NULL) {
             liberarGrafo(*grafo);
         }
+
         //Faz a leitura do arquivo, retorna o Status e atualiza o grafo
         GrafoStatus status = lerGrafoDeArquivo(nomeArquivo, grafo, direcionado);
         imprimirMensagemGrafo(status);
     }
 
+    // Executa a Busca em Profundidade (recursiva ou iterativa)
     void executarBuscaEmProfundidade(Grafo* grafo) {
-        int origem;
+        int inicio;
 
         printf("\nDigite o vértice de início para a DFS (0 a %d): ", grafo->V-1);
-        scanf("%d", &origem);
+        scanf("%d", &inicio);
 
-        if (origem < 0 || origem >= grafo->V) {
+        // Verifica se o vértice informado pertence ao escopo do grafo
+        if (inicio < 0 || inicio >= grafo->V) {
             printf("Erro: vértice inválido.\n");
             return;
         }
 
-        int visitado[grafo->V];
-        for (int i=0; i<grafo->V; i++)
-            visitado[i] = 0;
+        int *visitado = (int*)calloc(grafo->V, sizeof(int));
+        if (visitado == NULL) {
+            printf("Erro: memória insuficiente.\n");
+            return;
+        }
 
         //escolha da implementação recursiva ou iterativa
         char op;
@@ -91,55 +98,77 @@
         //evita problemas com Case
         GrafoStatus status;
         if (op == 'R' || op == 'r') {
-            printf("=== BUSCA EM PROFUNDIDADE RECURSIVA (Origem %d) ===\n", origem);
+            printf("=== BUSCA EM PROFUNDIDADE RECURSIVA (Origem %d) ===\n", inicio);
             printf("Ordem: ");
-            status = DFSRecursiva(grafo, origem, visitado);
+            status = DFSRecursiva(grafo, inicio, visitado);
             printf("\n");
-            //imprimirMensagemGrafo(status);
+
+            if (status != GRAFO_OK) {
+                imprimirMensagemGrafo(status);
+                free(visitado);
+                return;
+            }
+
             if (!grafo->direcionado)
                 DFSRecCompConexos(grafo);
             else
                 algoritmoKosaraju(grafo);
+
         } else if (op == 'I' || op == 'i') {
-            printf("=== BUSCA EM PROFUNDIDADE ITERATIVA (Origem %d) ===\n", origem);
+            printf("=== BUSCA EM PROFUNDIDADE ITERATIVA (Origem %d) ===\n", inicio);
             printf("Ordem: ");
-            status = DFSIterativa(grafo, origem, visitado);
+            status = DFSIterativa(grafo, inicio, visitado);
             printf("\n");
-            //imprimirMensagemGrafo(status);
+
+            if (status != GRAFO_OK) {
+                imprimirMensagemGrafo(status);
+                free(visitado);
+                return;
+            }
+
             if (!grafo->direcionado)
                 DFSIteCompConexos(grafo);
             else
                 algoritmoKosaraju(grafo);
+
         } else
             printf("Opção inválida!");
+
+        free(visitado);
     }
 
+    // Executa a Busca em Largura a partir de um vértice escolhido pelo usuário
     void executarBuscaEmLargura(Grafo* grafo) {
         int origem;
         printf("\nDigite o vértice de início para a BFS (0 a %d): ", grafo->V-1);
         scanf("%d", &origem);
 
+        // Verifica se o vértice informado pertence ao escopo do grafo
         if (origem < 0 || origem >= grafo->V) {
             printf("Erro: Vértice inválido!\n");
             return;
         }
 
         GrafoStatus status = BFS(grafo, origem);
-        //imprimirMensagemGrafo(status);
+        if (status != GRAFO_OK)
+            imprimirMensagemGrafo(status);
     }
 
+    // Executa o algoritmo de Dijkstra a partir de um vértice de origem escolhido pelo usuário
     void executarDijkstra(Grafo* grafo) {
         int origem;
         printf("\nDigite o vertice de ORIGEM: ");
         scanf("%d", &origem);
 
+        // Verifica se o vértice informado pertence ao escopo do grafo
         if (origem < 0 || origem >= grafo->V) {
             printf("Erro: Vértice inválido!\n");
             return;
         }
 
         GrafoStatus status = algoritmoDijkstra(grafo, origem);
-        //imprimirMensagemGrafo(status);
+        if (status != GRAFO_OK)
+            imprimirMensagemGrafo(status);
     }
 
     void exibirEncerramento() {
@@ -214,11 +243,13 @@
                 }
                 case 5:
                     status = ordemTopologica(grafo);
-                    //imprimirMensagemGrafo(status);
+                    if (status != GRAFO_OK)
+                        imprimirMensagemGrafo(status);
                     break;
                 case 6:
                     status = algoritmoPrim(grafo);
-                    //imprimirMensagemGrafo(status);
+                    if (status != GRAFO_OK)
+                        imprimirMensagemGrafo(status);
                     break;
                 case 7:
                     executarDijkstra(grafo);
