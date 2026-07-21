@@ -15,4 +15,8 @@ add_executable(grafos
         src/validacao.c
         include/menu.h
         src/menu.c
+        src/algoritmos.c
+        include/algoritmos.h
+        src/estatisticas.c
+        include/estatisticas.h
 )
