@@ -1,7 +1,3 @@
-//
-// Created by tavol on 20/07/2026.
-//
-
 #include "estatisticas.h"
 
 // --- Funções para Estatisticas dos Grafos ---

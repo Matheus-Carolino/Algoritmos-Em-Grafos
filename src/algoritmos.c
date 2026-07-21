@@ -1,7 +1,3 @@
-//
-// Created by tavol on 20/07/2026.
-//
-
     #include "algoritmos.h"
 
 // --- Funções de busca ---
@@ -329,6 +325,7 @@
         // Verifica se o grafo é direcionado
         if (g->direcionado) {
             printf("Erro: o algoritmo de Prim só pode ser aplicado a grafos não direcionados.");
+            return ERRO_ARESTA_INVALIDA;
         }
 
         int V = g->V;
