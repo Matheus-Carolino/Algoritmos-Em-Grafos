@@ -12,12 +12,6 @@
         No *prox;
     };
 
-    struct Grafo {
-        int V;      //Número de Vértices
-        int A;      //Número de Arestas
-        No **lista; //Lista de adjacência
-    };
-
     //--- Funções Auxiliares ---
     //Cria um novo Nó com alocação dinâmica
     No* criarNo(int destino, int peso) {
@@ -29,7 +23,7 @@
     }
 
     //inicializa o grafo com alocação dinâmica
-    Grafo* criarGrafo(int vertices, int arestas) {
+    Grafo* criarGrafo(int vertices, int arestas, int direcionado) {
         Grafo *grafo = (Grafo*)malloc(sizeof(Grafo));
         // Tratamento de erro para ponteiro nulo
         if (grafo == NULL)
@@ -37,6 +31,7 @@
 
         grafo->V = vertices;
         grafo->A = arestas;
+        grafo->direcionado = direcionado;
 
         //Aloca o array de listas (indexado de 0 até V - 1)
         grafo->lista = (No**)malloc((vertices) * sizeof(No*));
@@ -77,19 +72,22 @@
         if (grafo == NULL)
             return;
 
-        printf("=== GRAFO ===\n\n");
+        printf("\n=== LISTAS DE ADJACENCIA ===\n\n");
 
         No* atual = NULL;
         for (int i=0; i<grafo->V; i++) {
             // Se a lista de vértices não está vazia
+            printf("Vertice [%d]: ", i);
             if (grafo->lista[i] != NULL){
-                printf("Vertice %d: ", i);
                 atual = grafo->lista[i];
                 while (atual->prox != NULL) {
-                    printf("%d -> ", atual->destino);
+                    printf("(%d, peso %d) -> ", atual->destino, atual->peso);
                     atual = atual->prox;
                 }
-                printf("%d \n",atual->destino);
+                printf("(%d, peso %d) \n",atual->destino, atual->peso);
+            }
+            else {
+                printf("sem conexoes\n");
             }
         }
     }
@@ -149,18 +147,19 @@
         inserirOrdenado(&grafo->lista[destino], novoOrigem);
     }
 
-    //Lê o grafo do arquivo.txt
-    GrafoStatus lerGrafoDeArquivo(const char* nomeArquivo, Grafo** grafo) {
+    //Lê e trata grafo de um arquivo
+    GrafoStatus lerGrafoDeArquivo(const char* nomeArquivo, Grafo** grafo, int direcionado) {
         // Tratamento de erro para ponteiro nulo
         if (grafo == NULL)
             return ERRO_MEMORIA_INSUFICIENTE;
         *grafo = NULL; //evita lixo de memória residual
 
+        // Abertura de arquivo
         FILE* arquivo = fopen(nomeArquivo, "r");
         if (arquivo == NULL)
             return ERRO_ARQUIVO_NAO_ENCONTRADO;
 
-        int V, A;
+        // Leitura do cabeçalho
         char linha[100];
         char lixo[2];
 
@@ -169,6 +168,7 @@
             return ERRO_ARQUIVO_NAO_ENCONTRADO;
         }
 
+        int V, A;
         //verifica se o cabeçalho está no formato correto
         if (sscanf(linha, "%d %d %1s", &V, &A, lixo) != 2) {
             fclose(arquivo);
@@ -180,33 +180,49 @@
             fclose(arquivo);
             return ERRO_NUMERO_INVALIDO;
         }
-        //cria o grafo
-        Grafo *novoGrafo = criarGrafo(V, A);
+
+        // Cria o grafo
+        Grafo *novoGrafo = criarGrafo(V, A, direcionado);
+        if (novoGrafo == NULL) {
+            fclose(arquivo);
+            return ERRO_MEMORIA_INSUFICIENTE;
+        }
 
         int origem, destino, peso;
-        //Loop para ler as arestas
+
+        // Loop para ler as arestas
         for (int i = 0; i < A; i++) {
+
             //Lê a próxima linha do arquivo
             if (fgets(linha, sizeof(linha), arquivo) == NULL) {
                 fclose(arquivo);
                 //O arquivo acabou antes de ler todas as arestas
+                liberarGrafo(novoGrafo);
                 return ERRO_FORMATO_INVALIDO;
             }
+
             //Valida se a linha esta no formato correto
             if (sscanf(linha, "%d %d %d %1s", &origem, &destino, &peso, lixo) != 3) {
                 fclose(arquivo);
+                liberarGrafo(novoGrafo);
                 return ERRO_FORMATO_INVALIDO;
             }
 
-            //Valida se os índices dos vértices são válidos
-            if (origem < 0 || origem >= V || destino < 0 || destino >= V) {
+            // Valida se os índices dos vértices são válidos e se o peso é positivo
+            if (origem < 0 || origem >= V || destino < 0 || destino >= V || peso < 0) {
                 fclose(arquivo);
+                liberarGrafo(novoGrafo);
                 return ERRO_ARESTA_INVALIDA;
             }
 
-            adicionarArestaDirecionada(novoGrafo, origem, destino, peso);
+            // Adiciona aresta correspondente a característica do grafo
+            if (direcionado)
+                adicionarArestaDirecionada(novoGrafo, origem, destino, peso);
+            else
+                adicionarArestaBidirecionada(novoGrafo, origem, destino, peso);
         }
-        //exporta o grafo preenchido e validado
+
+        // Exporta o grafo preenchido e validado
         *grafo = novoGrafo;
         fclose(arquivo);
         return GRAFO_OK;
@@ -305,7 +321,7 @@
         // Contador para numerar os componentes conexos
         int contador = 1;
 
-        printf("=== DFS RECURSIVA ===\n");
+        printf("=== COMPONENTES CONEXOS (DFS RECURSIVA) ===\n");
 
         // Percorre todos os vértices do grafo
         for (int i = 0; i < grafo->V; i++) {
@@ -334,7 +350,7 @@
         // Contador para numerar os componentes conexos
         int contador = 1;
 
-        printf("=== DFS ITERATIVA ===\n");
+        printf("=== COMPONENTES CONEXOS (DFS ITERATIVA) ===\n");
 
         // Percorre todos os vértices do grafo
         for (int i = 0; i < grafo->V; i++) {
@@ -378,7 +394,8 @@
         visitado[origem] = 1;
         distancia[origem] = 0;
 
-        printf("Ordem de visitacao da BFS: ");
+        printf("\n=== BUSCA EM LARGURA (Origem: %d) ===\n", origem);
+        printf("Ordem: ");
 
         int impressos = 0;
         while (inicio < fim) {
@@ -784,6 +801,9 @@
         if (grafo == NULL || grafo->V == 0) return false;
 
         int *cor = (int*) calloc(grafo->V, sizeof(int));
+        if (cor == NULL)
+            return false;
+
         for (int i = 0; i < grafo->V; i++) {
             if (cor[i] == 0) {
                 if (dfsCiclo(grafo, i, cor, -1, direcionado)) {
@@ -812,6 +832,8 @@
         if (grafo == NULL || grafo->V == 0) return false;
 
         bool *visitado = (bool*) calloc(grafo->V, sizeof(bool));
+        if (visitado == NULL)
+            return false;
         // Dispara a busca a partir do primeiro vértice (0)
         dfsConexo(grafo, 0, visitado);
 
@@ -871,14 +893,12 @@
             return;
         }
 
-        printf("\n=====================================");
-        printf("\n===  OPCAO 8 - ESTATISTICAS DO GRAFO ===");
-        printf("\n=====================================\n");
+        printf("===  ESTATISTICAS DO GRAFO ===\n\n");
 
         printf("- Numero de vertices: %d\n", grafo->V);
         printf("- Numero de arestas: %d\n", grafo->A);
 
-        bool direcionado = isDirecionado(grafo);
+        bool direcionado = grafo->direcionado;
         printf("- Tipo de grafo: %s\n", direcionado ? "Direcionado (Digrafo)" : "Nao-direcionado");
 
         calcularImprimirGraus(grafo, direcionado);
@@ -890,10 +910,8 @@
         printf("- Presenca de ciclos: %s\n", ciclos ? "SIM, contem ciclos" : "NAO possui ciclos (Aciclico)");
 
         float densidade = calcularDensidade(grafo, direcionado);
-        printf("- Densidade do grafo: %.4f\n", densidade);
-        printf("=====================================\n");
+        printf("- Densidade do grafo: %.4f\n\n", densidade);
     }
-
 
     //funções extras
 
@@ -983,39 +1001,47 @@
             }
         }
 
-        printf("A maior distancia que pode ser percorrida nesse DAG é: %d", maiorDistancia);
+        printf("A maior distancia que pode ser percorrida nesse DAG é: %d\n", maiorDistancia);
         return GRAFO_OK;
     }
 
 
-    void DFSPilha (Grafo *grafo, int indice, int *visitados, int *pilha, int *sp) {
+    void DFSPilha(Grafo *grafo, int indice, int *visitados, int *pilha, int *topo){
+        // Verifica se o grafo é válido
         if (grafo == NULL) {
             return;
         }
+
         int destino;
         visitados[indice] = 1;
+
+        // Percorre todos os vértices adjacentes
         No* atual = grafo->lista[indice];
         while (atual != NULL) {
             destino = atual->destino;
             if (!visitados[destino]) {
-                DFSPilha(grafo, destino,visitados, pilha, sp);
+                DFSPilha(grafo, destino,visitados, pilha, topo);
             } 
 
             atual = atual->prox;
         }
 
-        pilha[++(*sp)] = indice;
+        // Empilha o vértice após visitar todos os seus descendentes
+        pilha[++(*topo)] = indice;
     }
 
-
+    // Cria o grafo transposto, invertendo a direção de todas as arestas.
     Grafo* criarGrafoTransposto(Grafo *grafo) {
+        // Verifica se o grafo é valido
         if (grafo == NULL || grafo->V == 0) {
             return NULL;
         }
-        Grafo* grafoTransposto = criarGrafo(grafo->V, grafo->A);
+
+        Grafo* grafoTransposto = criarGrafo(grafo->V, grafo->A, grafo->direcionado);
         if (grafoTransposto == NULL) {
             return NULL;
         }
+
         No *atual;
         for (int i = 0; i < grafo->V;i++) {
             atual = grafo->lista[i];
@@ -1028,19 +1054,28 @@
         return grafoTransposto;
     }
 
-    GrafoStatus Kosaraju (Grafo *grafo) {
+    // Identifica e imprime os componentes fortemente conexos de um grafo direcionado
+    GrafoStatus Kosaraju(Grafo *grafo) {
+        // Verifica se o grafo informado é válido
         if (grafo == NULL) {
             return ERRO_MEMORIA_INSUFICIENTE;
         }
-        int cfc = 0;
-        int temp;
+
+        int numeroComponentes = 0;
+        int vertice;
+
+        // Vetor utilizado para marcar os vértices já visitados
         int* visitados = (int *) calloc (grafo->V, sizeof(int));
+        if (visitados == NULL)
+            return ERRO_MEMORIA_INSUFICIENTE;
+
+        // Pilha que vai armazenar os vértices em ordem decrescente de finalização  da DFS
         int pilha[grafo->V];
-        int sp = -1;
+        int topo = -1;
         
         for (int i = 0; i < grafo->V; i++) {
             if (!visitados[i]) {
-                DFSPilha(grafo, i, visitados, pilha, &sp);
+                DFSPilha(grafo, i, visitados, pilha, &topo);
             } 
         }
 
@@ -1048,21 +1083,39 @@
             visitados[i] = 0;
         }
 
+        // Cria o grafo com todas as arestas invertidas
         Grafo* grafoTransposto = criarGrafoTransposto(grafo);
-
-        while (sp >= 0) {
-            temp = pilha[sp--];
-
-            if (!visitados[temp]){
-                cfc++;
-
-                printf("COMPONENTES FORTEMENTE CONECTADOS DE %d :", cfc);
-
-                DFSRecursiva(grafoTransposto, temp, visitados);
-            }
-
-            printf("\n");
+        if (grafoTransposto == NULL) {
+            free(visitados);
+            return ERRO_MEMORIA_INSUFICIENTE;
         }
 
-     return GRAFO_OK;   
+        printf("\n=== COMPONENTES FORTEMENTE CONEXOS ===\n\n");
+        while (topo >= 0) {
+            vertice = pilha[topo--];
+
+            if (!visitados[vertice]){
+                numeroComponentes++;
+
+                printf("Componente de %d :", numeroComponentes);
+
+                DFSRecursiva(grafoTransposto, vertice, visitados);
+                printf("\n");
+            }
+        }
+
+        // Libera a memória alocada dinamicamente
+        free(visitados);
+        liberarGrafo(grafoTransposto);
+        return GRAFO_OK;
+    }
+
+    bool ehDAG(Grafo* grafo) {
+        if (grafo == NULL || !grafo->direcionado)
+            return false;
+
+        if (temCiclo(grafo, grafo->direcionado));
+            return false;
+
+        return true;
     }

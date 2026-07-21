@@ -44,8 +44,9 @@
         int opcao = 0;
         Grafo* grafo = NULL;
         GrafoStatus status;
-        char nomeArquivo[100];
+        char nomeArquivo[100], op;
         int origem, alvo, inicio;
+        int direcionado;
 
         // Strings limpas e sem as barras nas pontas para alinhar perfeitamente com a função display
         char m1[] = "           SISTEMA DE GRAFOS           ";
@@ -79,48 +80,89 @@
 
             switch (opcao) {
                 case 1:
+                    printf("O grafo a ser carregado é direcionado? (S | N)\n");
+                    scanf(" %c", &op); // O espaço limpa o buffer para evitar bugs
+                    printf("\n");
+
+                    if (op == 'N' || op == 'n') {
+                        direcionado = 0;
+                    } else if (op == 'S' || op == 's') {
+                        direcionado = 1;
+                    } else {
+                        printf("Opção inválida!");
+                        break;
+                    }
+
                     printf("Digite o caminho do arquivo (ex: ../data/grafo1.txt): ");
-                    scanf("%s", nomeArquivo);
+                    scanf("%99s", nomeArquivo);
                     //Evita lixo de memória residual
                     if (grafo != NULL) {
                         liberarGrafo(grafo);
                     }
                     //Faz a leitura do arquivo, retorna o Status e atualiza o grafo
-                    status = lerGrafoDeArquivo(nomeArquivo, &grafo);
+                    status = lerGrafoDeArquivo(nomeArquivo, &grafo, direcionado);
                     imprimirMensagemGrafo(status);
                     break;
 
                 case 2:
                     mostrarGrafo(grafo);
                     break;
-                case 3:
-                    char op;
-                    int visitado[] = {0};
+                case 3: {
+                    printf("\nDigite o vertice de inicio para a DFS (0 a %d): ", grafo->V-1);
+                    scanf("%d", &origem);
 
-                    printf("\nDigite o vertice de inicio para a DFS (0 a 5): ");
-                    scanf("%d", &inicio);
+                    if (origem < 0 || origem >= grafo->V) {
+                        printf("Erro: vertice inválido\n");
+                        break;
+                    }
+
+                    int visitado[grafo->V];
+                    for (int i=0; i<grafo->V; i++)
+                        visitado[i] = 0;
+
                     //escolha da implementação recursiva ou iterativa
                     printf("\nQual implementação de DFS você deseja usar? (R | I)\n");
                     scanf(" %c", &op); // O espaço limpa o buffer para evitar bugs
+                    printf("\n");
 
                     //evita problemas com Case
                     if (op == 'R' || op == 'r') {
+                        printf("=== BUSCA EM PROFUNDIDADE RECURSIVA (Origem %d) ===\n", origem);
+                        printf("Ordem: ");
                         status = DFSRecursiva(grafo, origem, visitado);
-                        imprimirMensagemGrafo(status);
+                        //imprimirMensagemGrafo(status);
+                        if (!grafo->direcionado)
+                            DFSRecCompConexos(grafo);
+                        else
+                            Kosaraju(grafo);
                     } else if (op == 'I' || op == 'i') {
+                        printf("=== BUSCA EM PROFUNDIDADE ITERATIVA (Origem %d) ===\n", origem);
+                        printf("Ordem: ");
                         status = DFSIterativa(grafo, origem, visitado);
-                        imprimirMensagemGrafo(status);
+                        //imprimirMensagemGrafo(status);
+                        if (!grafo->direcionado)
+                            DFSIteCompConexos(grafo);
+                        else
+                            Kosaraju(grafo);
                     } else
                         printf("Opção inválida!");
-                    break;
 
-                case 4:
-                    printf("\nDigite o vertice de inicio para a BFS (0 a 5): ");
+                    break;
+                }
+
+                case 4: {
+                    printf("\nDigite o vertice de inicio para a BFS (0 a %d): ", grafo->V-1);
                     scanf("%d", &inicio);
+
+                    if (inicio < 0 || inicio >= grafo->V) {
+                        printf("Erro: vertice invalido\n");
+                        break;
+                    }
 
                     status = BFS(grafo, inicio);
                     imprimirMensagemGrafo(status);
                     break;
+                }
 
                 case 5:
                     printf("\n");
