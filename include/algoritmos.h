@@ -1,4 +1,5 @@
 #ifndef GRAFOS_BUSCAS_H
+#define GRAFOS_BUSCAS_H
 
     #include "grafo.h"
 
@@ -21,7 +22,5 @@
     //funções extras
     GrafoStatus algoritmoKosaraju (Grafo *grafo);
     GrafoStatus caminhoCritico (Grafo *grafo);
-
-#define GRAFOS_BUSCAS_H
 
 #endif //GRAFOS_BUSCAS_H

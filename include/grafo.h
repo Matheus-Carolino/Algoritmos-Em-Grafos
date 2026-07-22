@@ -3,7 +3,6 @@
     #include <stdio.h>
     #include <stdlib.h>
     #include <limits.h>
-    #include "validacao.h"
     #include <stdbool.h>
     #include "validacao.h"
 

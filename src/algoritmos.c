@@ -37,7 +37,9 @@
             return ERRO_VERTICE_INVALIDO;
 
         // Inicializa a pilha auxiliar
-        int pilha[grafo->V];
+        int* pilha = (int*)malloc(grafo->V*sizeof(int));
+        if (pilha == NULL)
+            return ERRO_MEMORIA_INSUFICIENTE;
         int topo = -1;
 
         // Empilha o vértice de origem
@@ -74,6 +76,8 @@
             if (!encontrou)
                 topo--;
         }
+
+        free(pilha);
         return GRAFO_OK;
     }
 
@@ -85,9 +89,9 @@
             return ERRO_MEMORIA_INSUFICIENTE;
 
         // Inicializa o vetor para controlar os vértices visitados
-        int visitado[grafo->V];
-        for (int i = 0; i < grafo->V; i++)
-            visitado[i] = 0;
+        int *visitado = (int*)calloc(grafo->V, sizeof(int));
+        if (visitado == NULL)
+            return ERRO_MEMORIA_INSUFICIENTE;
 
 
         // Contador para numerar os componentes conexos
@@ -104,6 +108,8 @@
                 printf("\n");
             }
         }
+
+        free(visitado);
         return GRAFO_OK;
     }
 
@@ -115,9 +121,9 @@
             return ERRO_MEMORIA_INSUFICIENTE;
 
         // Inicializa o vetor para controlar dos vértices visitados
-        int visitado[grafo->V];
-        for (int i = 0; i < grafo->V; i++)
-            visitado[i] = 0;
+        int *visitado = (int*)calloc(grafo->V, sizeof(int));
+        if (visitado == NULL)
+            return ERRO_MEMORIA_INSUFICIENTE;
 
         // Contador para numerar os componentes conexos
         int contador = 1;
@@ -133,6 +139,8 @@
                 printf("\n");
             }
         }
+
+        free(visitado);
         return GRAFO_OK;
     }
 
@@ -149,17 +157,25 @@
         }
 
         // Vetores locais
-        int fila[grafo->V];
-        int visitado[grafo->V];
-        int distancia[grafo->V];
+        int *fila = (int*) malloc(grafo->V * sizeof(int));
+        int *visitado = (int*) calloc(grafo->V, sizeof(int));
+        int *distancia = (int*) malloc(grafo->V * sizeof(int));
+
+        if (fila == NULL || visitado == NULL || distancia == NULL) {
+            free(fila);
+            free(visitado);
+            free(distancia);
+            return ERRO_MEMORIA_INSUFICIENTE;
+        }
+
         int inicio = 0;
         int fim = 0;
 
-        // Inicializa os vetores de controle
+        // Inicializa o vetor de distância
         for (int i = 0; i < grafo->V; i++) {
-            visitado[i] = 0; // 0 indica que o vertice ainda não foi visitado
             distancia[i] = -1; // -1 indica que o vértice ainda é inacessível
         }
+
 
         // Inicializa a estrutura com o vértice de partida
         fila[fim++] = origem;
@@ -203,6 +219,10 @@
                 printf("Vertice %d: inacessivel\n", i);
             }
         }
+
+        free(fila);
+        free(visitado);
+        free(distancia);
         return GRAFO_OK;
     }
 
@@ -214,8 +234,7 @@
 
         // Verifica se um grafo é direcionado
         if (!grafo->direcionado) {
-            printf("Erro: grafo não direcionado (não é um DAG)");
-            return ERRO_ARESTA_INVALIDA;
+            return ERRO_GRAFO_NAO_DIRECIONADO;
         }
 
         int V = grafo->V;
@@ -324,8 +343,7 @@
 
         // Verifica se o grafo é direcionado
         if (g->direcionado) {
-            printf("Erro: o algoritmo de Prim só pode ser aplicado a grafos não direcionados.");
-            return ERRO_ARESTA_INVALIDA;
+            return ERRO_GRAFO_DIRECIONADO;
         }
 
         int V = g->V;
@@ -530,16 +548,20 @@
         return GRAFO_OK;
     }
 
-        //funções extras
-
+    //funções extras
     GrafoStatus caminhoCritico (Grafo *grafo) {
         if (grafo == NULL || grafo->V == 0) {
             return ERRO_MEMORIA_INSUFICIENTE;
         }
+
+        if (!grafo->direcionado) {
+            return ERRO_GRAFO_NAO_DIRECIONADO;
+        }
+
         //Primeira Parte: Verificar se é um DAG
         No* atual;
-        int zeroSetasApontando[grafo->V];
-        int setasApontando[grafo->V];
+        int *zeroSetasApontando = (int*) calloc(grafo->V, sizeof(int));
+        int *setasApontando = (int*) calloc(grafo->V, sizeof(int));
         int inicio = 0;
         int fim = 0;
         int vertices = 0;
@@ -547,9 +569,18 @@
         int zeros = 0;
 
         //Segunda Parte : Achar o maior caminho
-        int maiorCaminho[grafo->V];
+        int *maiorCaminho = (int*) calloc(grafo->V, sizeof(int));
         int peso = 0;
         int maiorDistancia = 0;
+
+        //Verificando se algumas das alocações deu erruo
+        if (zeroSetasApontando == NULL || setasApontando == NULL || maiorCaminho == NULL) {
+            free(zeroSetasApontando);
+            free(setasApontando);
+            free(maiorCaminho);
+            return ERRO_MEMORIA_INSUFICIENTE;
+        }
+
         for (int i = 0; i < grafo->V; i++) {
             setasApontando[i] = 0;
             zeroSetasApontando[i] = 0;
@@ -590,8 +621,10 @@
         }
 
         if (vertices < grafo->V) {
-            printf("o grafo nao e DAGs\n");
-            return ERRO_FORMATO_INVALIDO; // ciclico;
+            free(zeroSetasApontando);
+            free(setasApontando);
+            free(maiorCaminho);
+            return ERRO_GRAFO_COM_CICLOS; // ciclico;
         }
 
         for (int i = 0; i < grafo->V; i++) {
@@ -619,9 +652,12 @@
         }
 
         printf("A maior distancia que pode ser percorrida nesse DAG é: %d\n", maiorDistancia);
+
+        free(zeroSetasApontando);
+        free(setasApontando);
+        free(maiorCaminho);
         return GRAFO_OK;
     }
-
 
     void DFSPilha(Grafo *grafo, int indice, int *visitados, int *pilha, int *topo){
         // Verifica se o grafo é válido
@@ -683,11 +719,17 @@
 
         // Vetor utilizado para marcar os vértices já visitados
         int* visitados = (int *) calloc (grafo->V, sizeof(int));
-        if (visitados == NULL)
-            return ERRO_MEMORIA_INSUFICIENTE;
 
-        // Pilha que vai armazenar os vértices em ordem decrescente de finalização  da DFS
-        int pilha[grafo->V];
+        // Pilha que vai armazenar os vértices em ordem decrescente de finalização da DFS
+        int* pilha = (int*) malloc(grafo->V * sizeof(int));
+
+        // Verifica se a alocação falhou em algum vetor
+        if (visitados == NULL || pilha == NULL) {
+            free(visitados);
+            free(pilha);
+            return ERRO_MEMORIA_INSUFICIENTE;
+        }
+
         int topo = -1;
 
         for (int i = 0; i < grafo->V; i++) {
@@ -704,6 +746,7 @@
         Grafo* grafoTransposto = criarGrafoTransposto(grafo);
         if (grafoTransposto == NULL) {
             free(visitados);
+            free(pilha);
             return ERRO_MEMORIA_INSUFICIENTE;
         }
 
@@ -714,7 +757,7 @@
             if (!visitados[vertice]){
                 numeroComponentes++;
 
-                printf("Componente de %d :", numeroComponentes);
+                printf("Componente de %d: ", numeroComponentes);
 
                 DFSRecursiva(grafoTransposto, vertice, visitados);
                 printf("\n");
@@ -723,6 +766,7 @@
 
         // Libera a memória alocada dinamicamente
         free(visitados);
+        free(pilha);
         liberarGrafo(grafoTransposto);
         return GRAFO_OK;
     }

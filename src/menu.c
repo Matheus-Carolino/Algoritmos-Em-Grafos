@@ -6,37 +6,6 @@
 #include "algoritmos.h"
 #include "estatisticas.h"
 
-    //--- Funções de Renderização da Janela ---
-    void display(char *string) {
-        printf("┃");
-        while (*string) {
-            printf("%c", *string);
-            string++;
-            //SLEEP_MS(1);
-        }
-        printf("┃\n");
-    }
-
-    void print_upperwindow(int n) {
-        for (int i = 0; i < n; i++) {
-            if (i == 0) printf("┏");
-            else if (i == n - 1) printf("┓");
-            else printf("━");
-            //SLEEP_MS(1);
-        }
-        printf("\n");
-    }
-
-    void print_lowerwindow(int n) {
-        for (int i = 0; i < n; i++) {
-            if (i == 0) printf("┗");
-            else if (i == n - 1) printf("┛");
-            else printf("━");
-            //SLEEP_MS(1);
-        }
-        printf("\n");
-    }
-
     //--- Funções auxiliares do menu ---
 
     // Carrega um grafo de arquivo, substituindo o grafo atualmente em memória (se houver)
@@ -61,7 +30,7 @@
         scanf("%99s", nomeArquivo); // Evita buffer overflow
 
         //Evita lixo de memória residual
-        if (grafo != NULL) {
+        if (*grafo != NULL) {
             liberarGrafo(*grafo);
         }
 
@@ -108,12 +77,6 @@
                 free(visitado);
                 return;
             }
-
-            if (!grafo->direcionado)
-                DFSRecCompConexos(grafo);
-            else
-                algoritmoKosaraju(grafo);
-
         } else if (op == 'I' || op == 'i') {
             printf("=== BUSCA EM PROFUNDIDADE ITERATIVA (Origem %d) ===\n", inicio);
             printf("Ordem: ");
@@ -125,12 +88,6 @@
                 free(visitado);
                 return;
             }
-
-            if (!grafo->direcionado)
-                DFSIteCompConexos(grafo);
-            else
-                algoritmoKosaraju(grafo);
-
         } else
             printf("Opção inválida!");
 
@@ -171,6 +128,16 @@
             imprimirMensagemGrafo(status);
     }
 
+    // Executa a identificação de componentes do grafo.
+    void executarComponentes(Grafo *grafo) {
+        // Para grafos não direcionados, identifica os componentes conexos utilizando DFS.
+        // Para grafos direcionados, identifica os componentes fortemente conexos utilizando o algoritmo de Kosaraju.
+        GrafoStatus status = grafo->direcionado? algoritmoKosaraju(grafo) : DFSRecCompConexos(grafo);
+
+        if (status != GRAFO_OK)
+            imprimirMensagemGrafo(status);
+    }
+
     void exibirEncerramento() {
         printf("\nEncerrando o sistema. Até a próxima!\n");
         printf("  _______ ______          __  __    __   \n");
@@ -190,30 +157,30 @@
         CONFIG_TERMINAL();
         CLEAR_SCREEN();
 
-        // Strings limpas e sem as barras nas pontas para alinhar perfeitamente com a função display
-        char m1[] = "           SISTEMA DE GRAFOS           ";
-        char m2[] = "  1- Carregar grafo de arquivo         ";
-        char m3[] = "  2- Mostrar grafo (lista adjacencia)  ";
-        char m4[] = "  3- Busca em Profundidade (DFS)       ";
-        char m5[] = "  4- Busca em Largura (BFS)            ";
-        char m6[] = "  5- Ordenacao Topologica              ";
-        char m7[] = "  6- Arvore Geradora Minima (Prim)     ";
-        char m8[] = "  7- Menor Caminho (Dijkstra)          ";
-        char m9[] = "  8- Estatisticas do grafo             ";
-        char m10[] = "  9- Sair                              ";
-        char cr[] = " [PROJETO] :: TEAM 6                   ";
-
         Grafo* grafo = NULL;
         GrafoStatus status;
         int opcao;
 
         do {
             // Imprime o menu com a moldura corretamente
-            print_upperwindow(41);
-            display(m1); display(m2); display(m3); display(m4); display(m5);
-            display(m6); display(m7); display(m8); display(m9); display(m10);
-            display(cr);
-            print_lowerwindow(41);
+            printf(
+                "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n"
+                "┃           SISTEMA DE GRAFOS            ┃\n"
+                "┃  1- Carregar grafo de arquivo          ┃\n"
+                "┃  2- Mostrar grafo (lista adjacencia)   ┃\n"
+                "┃  3- Busca em Profundidade (DFS)        ┃\n"
+                "┃  4- Busca em Largura (BFS)             ┃\n"
+                "┃  5- Ordenacao Topologica               ┃\n"
+                "┃  6- Arvore Geradora Minima (Prim)      ┃\n"
+                "┃  7- Menor Caminho (Dijkstra)           ┃\n"
+                "┃  8- Estatisticas do grafo              ┃\n"
+                "┃  9- Componentes (Kosaraju/DFS)         ┃\n"
+                "┃  10- Caminho Critico                   ┃\n"
+                "┃  11- Sair                              ┃\n"
+                "┃                                        ┃\n"
+                "┃ [PROJETO] :: TEAM 6                    ┃\n"
+                "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n"
+            );
 
             printf("\nEscolha uma opção: ");
             scanf("%d", &opcao);
@@ -259,19 +226,27 @@
                     exibirEstatisticas(grafo);
                     break;
                 case 9:
+                    executarComponentes(grafo);
+                    break;
+                case 10:
+                    status = caminhoCritico(grafo);
+                    if (status != GRAFO_OK)
+                        imprimirMensagemGrafo(status);
+                    break;
+                case 11:
                     exibirEncerramento();
                     break;
                 default:
                     printf("\nOpção inválida!\n");
             }
 
-            if (opcao != 9) {
+            if (opcao != 11) {
                 printf("\n");
                 PAUSE_SCREEN();
                 CLEAR_SCREEN();
             }
 
-        } while (opcao != 9);
+        } while (opcao != 11);
 
         liberarGrafo(grafo);
     }
