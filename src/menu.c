@@ -5,7 +5,6 @@
 #include "grafo.h"
 #include "algoritmos.h"
 #include "estatisticas.h"
-#include "teste.h"
 
     //--- Funções auxiliares do menu ---
 

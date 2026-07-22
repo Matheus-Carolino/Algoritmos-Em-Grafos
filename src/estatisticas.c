@@ -79,7 +79,7 @@
         return true;
     }
 
-    bool ehFortementeConexo(Grafo *grafo) {
+    bool isFortementeConexo(Grafo *grafo) {
         if (grafo == NULL || grafo->V == 0)
             return false;
 
@@ -186,7 +186,7 @@
         calcularImprimirGraus(grafo);
 
         if (grafo->direcionado) {
-            printf("- Fortemente conexo: %s\n", ehFortementeConexo(grafo) ? "SIM" : "NAO");
+            printf("- Fortemente conexo: %s\n", isFortementeConexo(grafo) ? "SIM" : "NAO");
         }
         else {
             printf("- Conexo: %s\n", isConexo(grafo) ? "SIM" : "NAO");
