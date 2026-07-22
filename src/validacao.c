@@ -32,6 +32,7 @@
                 break;
             case ERRO_GRAFO_COM_CICLOS:
                 printf("Erro: O grafo contém ciclos e não pode ser usado nesse algoritmo!\n");
+                break;
             default:
                 printf("Erro: Desconhecido!");
                 break;

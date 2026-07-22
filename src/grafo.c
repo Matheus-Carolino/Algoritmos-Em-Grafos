@@ -4,6 +4,9 @@
     //Cria um novo Nó com alocação dinâmica
     No* criarNo(int destino, int peso) {
         No *novo = (No*)malloc(sizeof(No));
+        if (novo == NULL)
+            return NULL;
+        
         novo->destino = destino;
         novo->peso = peso;
         novo->prox = NULL;

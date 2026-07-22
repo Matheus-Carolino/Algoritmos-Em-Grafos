@@ -55,6 +55,7 @@
         // Verifica se o vértice está no escopo
         if (inicio < 0 || inicio >= grafo->V) {
             printf("Erro: vértice inválido!\n");
+            free(visitado);
             return;
         }
 
@@ -186,7 +187,7 @@
             scanf("%d", &opcao);
 
             // Se nenhum grafo foi carregado ainda
-            if (opcao >= 2 && opcao <= 8 && grafo == NULL) {
+            if (opcao >= 2 && opcao <= 10 && grafo == NULL) {
                 printf("\nErro: Nenhum grafo carregado! Escolha a opção 1 primeiro.\n\n");
                 PAUSE_SCREEN();
                 CLEAR_SCREEN();

@@ -526,7 +526,19 @@
         return GRAFO_OK;
     }
 
-    //funções extras
+    //--- Funções extras ---
+    int getPesoAresta(Grafo* grafo, int vertice1, int vertice2) {
+        No* atual = grafo->lista[vertice1];
+        while (atual != NULL) {
+            if (atual->destino == vertice2) {
+                return atual->peso;
+            }
+            atual = atual->prox;
+        }
+
+        return 0;
+    }
+
     GrafoStatus caminhoCritico (Grafo *grafo) {
         if (grafo == NULL || grafo->V == 0) {
             return ERRO_MEMORIA_INSUFICIENTE;
@@ -546,24 +558,35 @@
         int temp = 0;
         int zeros = 0;
 
-        //Segunda Parte : Achar o maior caminho
-        int *maiorCaminho = (int*) calloc(grafo->V, sizeof(int));
-        int peso = 0;
-        int maiorDistancia = 0;
-
         //Verificando se algumas das alocações deu erruo
-        if (zeroSetasApontando == NULL || setasApontando == NULL || maiorCaminho == NULL) {
+        if (zeroSetasApontando == NULL || setasApontando == NULL) {
             free(zeroSetasApontando);
             free(setasApontando);
+            return ERRO_MEMORIA_INSUFICIENTE;
+        }
+
+        //Segunda Parte : Achar o maior caminho
+        int *maiorCaminho = (int*) calloc(grafo->V, sizeof(int));
+        int *pais = (int*) malloc(grafo->V, sizeof(int));
+        int *caminho = (int *) malloc(grafo->V, sizeof(int));
+        int peso = 0;
+        int maiorDistancia = 0;
+        int ultimoVertice = 0;
+        int verticeAtual;
+        int indiceCaminho = 0;
+
+        //Verificando se algumas das alocações deu erruo
+        if (maiorCaminho == NULL || pais == NULL || caminho == NULL) {
             free(maiorCaminho);
+            free(pais);
+            free(caminho);
             return ERRO_MEMORIA_INSUFICIENTE;
         }
 
         for (int i = 0; i < grafo->V; i++) {
-            setasApontando[i] = 0;
-            zeroSetasApontando[i] = 0;
-            maiorCaminho[i] = 0;
+            pais[i] = -1;
         }
+
         for (int i = 0; i < grafo->V; i++) {
             atual = grafo->lista[i];
             while (atual != NULL) {
@@ -626,10 +649,31 @@
         for (int i = 0; i < grafo->V; i++) {
             if (maiorCaminho[i] > maiorDistancia) {
                 maiorDistancia = maiorCaminho[i];
+                ultimoVertice = i;
             }
         }
 
+        verticeAtual = ultimoVertice;
+
+        while (verticeAtual != -1) { //vai do ultimo vertice ate a origem
+            caminho[indiceCaminho++] = verticeAtual;
+            verticeAtual = pais[verticeAtual];
+        }
+
         printf("A maior distancia que pode ser percorrida nesse DAG é: %d\n", maiorDistancia);
+
+        printf("Caminho Critico : ");
+
+        //imprime o caminho de tras para frente para ficar o caminho do grafo original
+        for (int i = indiceCaminho - 1;i >= 0; i--) {
+            printf("%d", caminho[i]);
+
+            if (i > 0) {
+                printf(" -(%d)-> ", getPesoAresta(grafo, caminho[i], caminho[i-1]));
+            }
+
+        }
+
 
         free(zeroSetasApontando);
         free(setasApontando);
