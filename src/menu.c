@@ -5,6 +5,7 @@
 #include "grafo.h"
 #include "algoritmos.h"
 #include "estatisticas.h"
+#include "teste.h"
 
     //--- Funções auxiliares do menu ---
 
@@ -176,7 +177,8 @@
                 "┃  8- Estatisticas do grafo              ┃\n"
                 "┃  9- Componentes (Kosaraju/DFS)         ┃\n"
                 "┃  10- Caminho Critico                   ┃\n"
-                "┃  11- Sair                              ┃\n"
+                "┃  11- Executar Bateria de testes        ┃\n"
+                "┃  12- Sair                              ┃\n"
                 "┃                                        ┃\n"
                 "┃ [PROJETO] :: TEAM 6                    ┃\n"
                 "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n"
@@ -186,7 +188,7 @@
             scanf("%d", &opcao);
 
             // Se nenhum grafo foi carregado ainda
-            if (opcao >= 2 && opcao <= 8 && grafo == NULL) {
+            if (opcao >= 2 && opcao <= 12 && grafo == NULL) {
                 printf("\nErro: Nenhum grafo carregado! Escolha a opção 1 primeiro.\n\n");
                 PAUSE_SCREEN();
                 CLEAR_SCREEN();
@@ -234,6 +236,10 @@
                         imprimirMensagemGrafo(status);
                     break;
                 case 11:
+                    printf("\n");
+                    bateriaDeTestes(grafo);
+                    break;
+                case 12:
                     exibirEncerramento();
                     break;
                 default:

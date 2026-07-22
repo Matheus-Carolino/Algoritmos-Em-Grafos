@@ -19,4 +19,6 @@ add_executable(grafos
         include/algoritmos.h
         src/estatisticas.c
         include/estatisticas.h
+        src/teste.c
+        include/teste.h
 )
