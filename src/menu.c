@@ -132,7 +132,7 @@
     void executarComponentes(Grafo *grafo) {
         // Para grafos não direcionados, identifica os componentes conexos utilizando DFS.
         // Para grafos direcionados, identifica os componentes fortemente conexos utilizando o algoritmo de Kosaraju.
-        GrafoStatus status = grafo->direcionado? algoritmoKosaraju(grafo) : DFSRecCompConexos(grafo);
+        GrafoStatus status = grafo->direcionado? algoritmoKosaraju(grafo) : DFSCompConexos(grafo, 0);
 
         if (status != GRAFO_OK)
             imprimirMensagemGrafo(status);

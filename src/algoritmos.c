@@ -83,7 +83,7 @@
 
     // Identifica os componentes conexos do grafo utilizando DFS recursiva
     // Obs.: Funciona apenas para grafos não direcionados
-    GrafoStatus DFSRecCompConexos(Grafo* grafo) {
+    GrafoStatus DFSCompConexos(Grafo* grafo, int recursiva) {
         // Verifica se o grafo é válido
         if (grafo == NULL)
             return ERRO_MEMORIA_INSUFICIENTE;
@@ -97,45 +97,22 @@
         // Contador para numerar os componentes conexos
         int contador = 1;
 
-        printf("=== COMPONENTES CONEXOS (DFS RECURSIVA) ===\n");
+        if (recursiva)
+            printf("\n=== COMPONENTES CONEXOS (DFS RECURSIVA) ===\n");
+        else
+            printf("\n=== COMPONENTES CONEXOS (DFS ITERATIVA) ===\n");
 
         // Percorre todos os vértices do grafo
         for (int i = 0; i < grafo->V; i++) {
             // Inicia uma nova DFS caso o vértice ainda não tenha sido visitado
             if (!visitado[i] && grafo->lista[i] != NULL) {
                 printf("Componente %d: ", contador++);
-                DFSRecursiva(grafo, i, visitado);
-                printf("\n");
-            }
-        }
 
-        free(visitado);
-        return GRAFO_OK;
-    }
+                if (recursiva)
+                    DFSRecursiva(grafo, i, visitado);
+                else
+                    DFSIterativa(grafo, i, visitado);
 
-    // Identifica os componentes conexos do grafo utilizando DFS iterativa
-    // Obs.: Funciona apenas para grafos não direcionados
-    GrafoStatus DFSIteCompConexos(Grafo* grafo) {
-        // Verifica se o grafo é válido
-        if (grafo == NULL)
-            return ERRO_MEMORIA_INSUFICIENTE;
-
-        // Inicializa o vetor para controlar dos vértices visitados
-        int *visitado = (int*)calloc(grafo->V, sizeof(int));
-        if (visitado == NULL)
-            return ERRO_MEMORIA_INSUFICIENTE;
-
-        // Contador para numerar os componentes conexos
-        int contador = 1;
-
-        printf("=== COMPONENTES CONEXOS (DFS ITERATIVA) ===\n");
-
-        // Percorre todos os vértices do grafo
-        for (int i = 0; i < grafo->V; i++) {
-            // Inicia uma nova DFS caso o vértice ainda não tenha sido visitado
-            if (!visitado[i] && grafo->lista[i] != NULL) {
-                printf("Componente %d: ", contador++);
-                DFSIterativa(grafo, i, visitado);
                 printf("\n");
             }
         }
