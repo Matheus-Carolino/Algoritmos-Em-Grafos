@@ -20,6 +20,7 @@
     GrafoStatus algoritmoDijkstra(Grafo *grafo, int origem);
 
     //funções extras
+    Grafo* criarGrafoTransposto(Grafo *grafo);
     GrafoStatus algoritmoKosaraju (Grafo *grafo);
     GrafoStatus caminhoCritico (Grafo *grafo);
 

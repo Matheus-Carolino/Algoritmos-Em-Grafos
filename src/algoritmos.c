@@ -699,7 +699,7 @@
         for (int i = 0; i < grafo->V;i++) {
             atual = grafo->lista[i];
             while (atual != NULL) {
-                adicionarArestaDirecionada(grafoTransposto, atual->destino,i, atual->peso);
+                adicionarAresta(grafoTransposto, atual->destino,i, atual->peso);
                 atual = atual->prox;
             }
         }

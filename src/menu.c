@@ -46,15 +46,15 @@
         printf("\nDigite o vértice de início para a DFS (0 a %d): ", grafo->V-1);
         scanf("%d", &inicio);
 
-        // Verifica se o vértice informado pertence ao escopo do grafo
-        if (inicio < 0 || inicio >= grafo->V) {
-            printf("Erro: vértice inválido.\n");
+        int *visitado = (int*)calloc(grafo->V, sizeof(int));
+        if (visitado == NULL) {
+            printf("Erro: Falha ao alocar memória!\n");
             return;
         }
 
-        int *visitado = (int*)calloc(grafo->V, sizeof(int));
-        if (visitado == NULL) {
-            printf("Erro: memória insuficiente.\n");
+        // Verifica se o vértice está no escopo
+        if (inicio < 0 || inicio >= grafo->V) {
+            printf("Erro: vértice inválido!\n");
             return;
         }
 
@@ -96,17 +96,17 @@
 
     // Executa a Busca em Largura a partir de um vértice escolhido pelo usuário
     void executarBuscaEmLargura(Grafo* grafo) {
-        int origem;
+        int inicio;
         printf("\nDigite o vértice de início para a BFS (0 a %d): ", grafo->V-1);
-        scanf("%d", &origem);
+        scanf("%d", &inicio);
 
-        // Verifica se o vértice informado pertence ao escopo do grafo
-        if (origem < 0 || origem >= grafo->V) {
-            printf("Erro: Vértice inválido!\n");
+        // Verifica se o vértice está no escopo
+        if (inicio < 0 || inicio >= grafo->V) {
+            printf("Erro: vértice inválido!\n");
             return;
         }
 
-        GrafoStatus status = BFS(grafo, origem);
+        GrafoStatus status = BFS(grafo, inicio);
         if (status != GRAFO_OK)
             imprimirMensagemGrafo(status);
     }
@@ -114,12 +114,12 @@
     // Executa o algoritmo de Dijkstra a partir de um vértice de origem escolhido pelo usuário
     void executarDijkstra(Grafo* grafo) {
         int origem;
-        printf("\nDigite o vertice de ORIGEM: ");
+        printf("\nDigite o vertice de origem para o Algoritmo de Dijkstra (0 a %d): ", grafo->V-1);
         scanf("%d", &origem);
 
-        // Verifica se o vértice informado pertence ao escopo do grafo
+        // Verifica se o vértice está no escopo
         if (origem < 0 || origem >= grafo->V) {
-            printf("Erro: Vértice inválido!\n");
+            printf("Erro: vértice inválido!\n");
             return;
         }
 

@@ -20,14 +20,11 @@
         No **lista; //Lista de adjacência
     } Grafo;
 
-    //Assinaturas das funções auxiliares
+    //Assinatura das funções principais dos grafos
     Grafo* criarGrafo(int vertices, int arestas, int direcionado);
     void liberarGrafo(Grafo *grafo);
     void mostrarGrafo(Grafo *grafo);
-
-    //Assinatura das funções principais dos grafos
-    void adicionarArestaDirecionada(Grafo *grafo, int origem, int destino, int peso);
-    void adicionarArestaNaoDirecionada(Grafo *grafo, int origem, int destino, int peso);
+    void adicionarAresta(Grafo *grafo, int origem, int destino, int peso);
     GrafoStatus lerGrafoDeArquivo(const char* nomeArquivo, Grafo** grafo, int direcionado);
 
 #endif //GRAFOS_GRAFO_H

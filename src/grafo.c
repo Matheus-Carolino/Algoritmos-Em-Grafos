@@ -105,34 +105,29 @@
     }
 
     //--- Funções principais dos Grafos ---
-    //adiciona uma aresta direcionada (origem->destino)
-    void adicionarArestaDirecionada(Grafo *grafo, int origem, int destino, int peso) {
+    //adiciona uma aresta (origem->destino)
+    void adicionarAresta(Grafo *grafo, int origem, int destino, int peso) {
         // Tratamento de erro para ponteiro nulo
         if (grafo == NULL)
             return;
-        No* novo = criarNo(destino, peso);
-        if (novo == NULL)
-            return;
-        //chama a função auxiliar
-        inserirOrdenado(&grafo->lista[origem], novo);
-    }
 
-    //adiciona uma aresta bidirecional (origem <-> destino)
-    void adicionarArestaNaoDirecionada(Grafo *grafo, int origem, int destino, int peso) {
-        // Tratamento de erro para ponteiro nulo
-        if (grafo == NULL)
-            return;
         No* novoDestino = criarNo(destino, peso);
-        No* novoOrigem = criarNo(origem, peso);
-
-        if (novoOrigem == NULL || novoDestino == NULL) {
-            free(novoDestino);
-            free(novoOrigem);
+        if (novoDestino == NULL)
             return;
-        }
+
         //chama a função auxiliar
         inserirOrdenado(&grafo->lista[origem], novoDestino);
-        inserirOrdenado(&grafo->lista[destino], novoOrigem);
+
+        if (!grafo->direcionado) {
+            No* novoOrigem = criarNo(origem, peso);
+            if (novoOrigem == NULL) {
+                free(novoOrigem);
+                return;
+            }
+
+            //chama a função auxiliar
+            inserirOrdenado(&grafo->lista[destino], novoOrigem);
+        }
     }
 
     //Lê e trata grafo de um arquivo
@@ -164,7 +159,7 @@
         }
 
         //verificar se algum dos valores é negativo
-        if (V < 0 || A < 0) {
+        if (V <= 0 || A <= 0) {
             fclose(arquivo);
             return ERRO_NUMERO_INVALIDO;
         }
@@ -204,10 +199,7 @@
             }
 
             // Adiciona aresta correspondente a característica do grafo
-            if (direcionado)
-                adicionarArestaDirecionada(novoGrafo, origem, destino, peso);
-            else
-                adicionarArestaNaoDirecionada(novoGrafo, origem, destino, peso);
+            adicionarAresta(novoGrafo, origem, destino, peso);
         }
 
         // Exporta o grafo preenchido e validado

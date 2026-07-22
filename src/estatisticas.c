@@ -1,4 +1,5 @@
 #include "estatisticas.h"
+#include "algoritmos.h"
 
     // --- Funções para Estatisticas dos Grafos ---
     //Auxiliares e função para detectar ciclos por DFS (cores)
@@ -25,7 +26,7 @@
         return false;
     }
 
-    bool temCiclo(Grafo *grafo, bool direcionado) {
+    bool temCiclo(Grafo *grafo) {
         if (grafo == NULL || grafo->V == 0) return false;
 
         int *cor = (int*) calloc(grafo->V, sizeof(int));
@@ -34,7 +35,7 @@
 
         for (int i = 0; i < grafo->V; i++) {
             if (cor[i] == 0) {
-                if (dfsCiclo(grafo, i, cor, -1, direcionado)) {
+                if (dfsCiclo(grafo, i, cor, -1, grafo->direcionado)) {
                     free(cor);
                     return true;
                 }
@@ -76,22 +77,74 @@
         return true;
     }
 
-    //Calcula a densidade do grafo
-    float calcularDensidade(Grafo *grafo, bool direcionado) {
-        if (grafo == NULL || grafo->V <= 1) return 0.0;
+    bool ehFortementeConexo(Grafo *grafo) {
+        if (grafo == NULL || grafo->V == 0)
+            return false;
 
-        if (direcionado) {
-            return (float)grafo->A / (grafo->V * (grafo->V - 1));
+        int V = grafo->V;
+        bool *visitado = (bool*) calloc(V, sizeof(bool));
+        if (visitado == NULL)
+            return false;
+
+        // DFS a partir do vértice 0 no grafo original
+        dfsConexo(grafo, 0, visitado);
+        for (int i = 0; i < V; i++) {
+            if (!visitado[i]) {
+                free(visitado);
+                return false; // já sabemos que não é fortemente conexo
+            }
         }
-        return (float)grafo->A / ((grafo->V * (grafo->V - 1)) / 2.0);
+
+        // DFS a partir do vértice 0 no grafo TRANSPOSTO
+        Grafo *transposto = criarGrafoTransposto(grafo);
+        if (transposto == NULL) {
+            free(visitado);
+            return false;
+        }
+
+        for (int i = 0; i < V; i++)
+            visitado[i] = 0;
+
+        dfsConexo(transposto, 0, visitado);
+
+        bool conexo = true;
+        for (int i = 0; i < V; i++) {
+            if (!visitado[i]) {
+                conexo = false;
+                break;
+            }
+        }
+
+        free(visitado);
+        liberarGrafo(transposto);
+        return conexo;
+    }
+
+    //Calcula a densidade do grafo
+    float calcularDensidade(Grafo *grafo) {
+        if (grafo == NULL || grafo->V <= 1) return 0.0f;
+
+        float v = (float)grafo->V;
+
+        if (grafo->direcionado) {
+            return (float)grafo->A / (v * (v - 1.0f));
+        }
+
+        return (float)grafo->A / ((v * (v - 1.0f)) / 2.0f);
     }
 
     //Calcula e imprime os graus de cada vértice baseado no tipo de grafo
-    void calcularImprimirGraus(Grafo *grafo, bool direcionado) {
+    void calcularImprimirGraus(Grafo *grafo) {
         if (grafo == NULL) return;
 
         int *grauEntrada = (int*) calloc(grafo->V, sizeof(int));
         int *grauSaida = (int*) calloc(grafo->V, sizeof(int));
+
+        if (grauEntrada == NULL || grauSaida == NULL) {
+            free(grauEntrada);
+            free(grauSaida);
+            return;
+        }
 
         for (int u = 0; u < grafo->V; u++) {
             No *atual = grafo->lista[u];
@@ -104,7 +157,7 @@
 
         printf("- Grau de cada vertice:\n");
         for (int i = 0; i < grafo->V; i++) {
-            if (direcionado) {
+            if (grafo->direcionado) {
                 printf("  Vertice %d: Grau de Entrada = %d | Grau de Saida = %d\n", i, grauEntrada[i], grauSaida[i]);
             } else {
                 printf("  Vertice %d: Grau = %d\n", i, grauSaida[i]);
@@ -126,17 +179,20 @@
         printf("- Numero de vertices: %d\n", grafo->V);
         printf("- Numero de arestas: %d\n", grafo->A);
 
-        bool direcionado = grafo->direcionado;
-        printf("- Tipo de grafo: %s\n", direcionado ? "Direcionado (Digrafo)" : "Nao-direcionado");
+        printf("- Tipo de grafo: %s\n", grafo->direcionado ? "Direcionado (Digrafo)" : "Nao-direcionado");
 
-        calcularImprimirGraus(grafo, direcionado);
+        calcularImprimirGraus(grafo);
 
-        bool conexo = isConexo(grafo);
-        printf("- Conectividade: %s\n", conexo ? "CONEXO" : "DESCONEXO");
+        if (grafo->direcionado) {
+            printf("- Fortemente conexo: %s\n", ehFortementeConexo(grafo) ? "SIM" : "NAO");
+        }
+        else {
+            printf("- Conexo: %s\n", isConexo(grafo) ? "SIM" : "NAO");
+        }
 
-        bool ciclos = temCiclo(grafo, direcionado);
+        bool ciclos = temCiclo(grafo);
         printf("- Presenca de ciclos: %s\n", ciclos ? "SIM, contem ciclos" : "NAO possui ciclos (Aciclico)");
 
-        float densidade = calcularDensidade(grafo, direcionado);
+        float densidade = calcularDensidade(grafo);
         printf("- Densidade do grafo: %.4f\n\n", densidade);
     }
