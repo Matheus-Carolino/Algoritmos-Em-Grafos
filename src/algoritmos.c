@@ -558,17 +558,10 @@
         int temp = 0;
         int zeros = 0;
 
-        //Verificando se algumas das alocações deu erruo
-        if (zeroSetasApontando == NULL || setasApontando == NULL) {
-            free(zeroSetasApontando);
-            free(setasApontando);
-            return ERRO_MEMORIA_INSUFICIENTE;
-        }
-
         //Segunda Parte : Achar o maior caminho
         int *maiorCaminho = (int*) calloc(grafo->V, sizeof(int));
-        int *pais = (int*) malloc(grafo->V, sizeof(int));
-        int *caminho = (int *) malloc(grafo->V, sizeof(int));
+        int *pais = (int*) malloc(grafo->V*sizeof(int));
+        int *caminho = (int *) malloc(grafo->V*sizeof(int));
         int peso = 0;
         int maiorDistancia = 0;
         int ultimoVertice = 0;
@@ -576,7 +569,9 @@
         int indiceCaminho = 0;
 
         //Verificando se algumas das alocações deu erruo
-        if (maiorCaminho == NULL || pais == NULL || caminho == NULL) {
+        if (maiorCaminho == NULL || pais == NULL || caminho == NULL || zeroSetasApontando == NULL || setasApontando == NULL) {
+            free(zeroSetasApontando);
+            free(setasApontando);
             free(maiorCaminho);
             free(pais);
             free(caminho);
@@ -625,6 +620,8 @@
             free(zeroSetasApontando);
             free(setasApontando);
             free(maiorCaminho);
+            free(pais);
+            free(caminho);
             return ERRO_GRAFO_COM_CICLOS; // ciclico;
         }
 
@@ -678,6 +675,8 @@
         free(zeroSetasApontando);
         free(setasApontando);
         free(maiorCaminho);
+        free(pais);
+        free(caminho);
         return GRAFO_OK;
     }
 
