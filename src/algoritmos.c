@@ -1,4 +1,5 @@
     #include "algoritmos.h"
+    #include <limits.h>
 
     // --- Funções de busca ---
     // Realiza uma busca em profundidade (DFS) de forma recursiva

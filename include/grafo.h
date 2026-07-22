@@ -2,8 +2,6 @@
 #define GRAFOS_GRAFO_H
     #include <stdio.h>
     #include <stdlib.h>
-    #include <limits.h>
-    #include <stdbool.h>
     #include "validacao.h"
 
     //Estruturas do gráfico

@@ -1,3 +1,5 @@
+
+#include <stdbool.h>
 #include "estatisticas.h"
 #include "algoritmos.h"
 
