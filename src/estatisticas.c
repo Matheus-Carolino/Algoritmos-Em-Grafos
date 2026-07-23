@@ -141,6 +141,7 @@
         for (int i = 0; i < V; i++) {
             if (!visitado[i]) {
                 free(visitado);
+                liberarGrafo(transposto);
                 return false;
             }
         }

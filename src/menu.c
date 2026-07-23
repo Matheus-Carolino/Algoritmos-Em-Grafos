@@ -47,18 +47,19 @@
         printf("\nDigite o vértice de início para a DFS (0 a %d): ", grafo->V-1);
         scanf("%d", &inicio);
 
-        int *visitado = (int*)calloc(grafo->V, sizeof(int));
-        if (visitado == NULL) {
-            printf("Erro: Falha ao alocar memória!\n");
-            return;
-        }
-
         // Verifica se o vértice está no escopo
         if (inicio < 0 || inicio >= grafo->V) {
             printf("Erro: vértice inválido!\n");
             return;
         }
 
+        // Inicializa vértice de controle com todas as posições zeradas
+        int *visitado = (int*)calloc(grafo->V, sizeof(int));
+        if (visitado == NULL) {
+            printf("Erro: Falha ao alocar memória!\n");
+            return;
+        }
+        
         //escolha da implementação recursiva ou iterativa
         char op;
         printf("\nQual implementação de DFS você deseja usar? (R | I)\n");

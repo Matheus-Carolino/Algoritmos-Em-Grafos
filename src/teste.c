@@ -4,7 +4,7 @@
         struct timespec inicio, fim;
         double tempoOT, tempoMC, tempoDFSIterativo, tempoDFSRecursivo, tempoBFS, tempoAGM, tempoKosaraju, tempoCC;
 
-        int* visitados = (int*) calloc (grafo->V, grafo->V);
+        int* visitados = (int*) calloc (grafo->V, sizeof(int));
 
         printf("=== Executando bateria de testes ===\n");
 
@@ -35,6 +35,9 @@
         printf("\n");
         clock_gettime(CLOCK_MONOTONIC, &fim);
         tempoDFSIterativo = (fim.tv_sec - inicio.tv_sec) + (fim.tv_nsec -inicio.tv_nsec)/1e9;
+
+        // Libera a memória dinâmica do vetor de controle utilizada na DFS
+        free(visitados);
 
         clock_gettime(CLOCK_MONOTONIC, &inicio);;
         BFS(grafo,0);
