@@ -109,7 +109,7 @@
         // Percorre todos os vértices do grafo
         for (int i = 0; i < grafo->V; i++) {
             // Inicia uma nova DFS caso o vértice ainda não tenha sido visitado
-            if (!visitado[i] && grafo->lista[i] != NULL) {
+            if (!visitado[i]) {
                 printf("Componente %d: ", contador++);
 
                 if (recursiva)

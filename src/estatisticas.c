@@ -5,7 +5,7 @@
 
     // --- Funções para Estatisticas dos Grafos ---
 
-    //Auxiliares e função para detectar ciclos por DFS (cores)
+    // Auxiliares e função para detectar ciclos por DFS (cores)
     // Branco (0): Vértice ainda não foi processado
     // Cinza (1): Vértice sendo processado
     // Preto (2): Vértice foi completamente processado, todos os seus descendentes foram processados
@@ -80,7 +80,7 @@
         }
     }
 
-    // Verifica se um grafo não direcionado é conexo.
+    // Verifica se um grafo **não direcionado** é conexo.
     bool isConexo(Grafo *grafo) {
         // Verifica se o grafo é válido
         if (grafo == NULL || grafo->V == 0) return false;
