@@ -68,7 +68,7 @@
         No* atual = NULL;
         for (int i=0; i<grafo->V; i++) {
             // Se a lista de vértices não está vazia
-            printf("Vertice [%d]: ", i);
+            printf("Vertice %d: ", i);
             if (grafo->lista[i] != NULL){
                 atual = grafo->lista[i];
                 while (atual->prox != NULL) {

@@ -19,8 +19,8 @@
     GrafoStatus algoritmoDijkstra(Grafo *grafo, int origem);
 
     //funções extras
+    GrafoStatus caminhoCritico (Grafo *grafo);
     Grafo* criarGrafoTransposto(Grafo *grafo);
     GrafoStatus algoritmoKosaraju (Grafo *grafo);
-    GrafoStatus caminhoCritico (Grafo *grafo);
 
 #endif //GRAFOS_BUSCAS_H

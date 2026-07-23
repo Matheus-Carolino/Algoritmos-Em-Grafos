@@ -5,6 +5,7 @@
 #include "grafo.h"
 #include "algoritmos.h"
 #include "estatisticas.h"
+#include "teste.h"
 
     //--- Funções auxiliares do menu ---
 
@@ -187,7 +188,7 @@
             scanf("%d", &opcao);
 
             // Se nenhum grafo foi carregado ainda
-            if (opcao >= 2 && opcao <= 12 && grafo == NULL) {
+            if (opcao >= 2 && opcao <= 11 && grafo == NULL) {
                 printf("\nErro: Nenhum grafo carregado! Escolha a opção 1 primeiro.\n\n");
                 PAUSE_SCREEN();
                 CLEAR_SCREEN();
@@ -245,13 +246,13 @@
                     printf("\nOpção inválida!\n");
             }
 
-            if (opcao != 11) {
+            if (opcao != 12) {
                 printf("\n");
                 PAUSE_SCREEN();
                 CLEAR_SCREEN();
             }
 
-        } while (opcao != 11);
+        } while (opcao != 12);
 
         liberarGrafo(grafo);
     }

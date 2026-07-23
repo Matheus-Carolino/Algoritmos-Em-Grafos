@@ -1,13 +1,14 @@
     #include "algoritmos.h"
     #include <limits.h>
 
-    // --- Funções de busca ---
+    // ----- Funções de busca -----
+
     // Realiza uma busca em profundidade (DFS) de forma recursiva
     GrafoStatus DFSRecursiva(Grafo* grafo, int origem, int *visitado) {
         // Verifica se o grafo é válido
         if (grafo == NULL || visitado == NULL)
             return ERRO_MEMORIA_INSUFICIENTE;
-
+        // Verifica se a origem está no escopo do grafo
         if (origem < 0 || origem >= grafo->V)
             return ERRO_VERTICE_INVALIDO;
 
@@ -33,7 +34,7 @@
         // Verifica se o grafo é válido
         if (grafo == NULL || visitado == NULL)
             return ERRO_MEMORIA_INSUFICIENTE;
-
+        // Verifica se a origem está no escopo do grafo
         if (origem < 0 || origem >= grafo->V)
             return ERRO_VERTICE_INVALIDO;
 
@@ -73,7 +74,9 @@
                 atual = atual->prox;
             }
 
-            // Se não encontrou vizinhos não visitados
+            // Se não encontrou vizinhos não visitados, desempilha
+            // Obs.: desempilhar só depois de visitar os vértices adjacentes
+            // mantém a ordem igual a da DFS Recursiva
             if (!encontrou)
                 topo--;
         }
@@ -90,10 +93,10 @@
             return ERRO_MEMORIA_INSUFICIENTE;
 
         // Inicializa o vetor para controlar os vértices visitados
+        // O calloc já inicia tudo com 0
         int *visitado = (int*)calloc(grafo->V, sizeof(int));
         if (visitado == NULL)
             return ERRO_MEMORIA_INSUFICIENTE;
-
 
         // Contador para numerar os componentes conexos
         int contador = 1;
@@ -124,18 +127,18 @@
 
     // Busca em largura (BFS)
     GrafoStatus BFS(Grafo *grafo, int origem) {
-
         // Verifica se o grafo é válido
         if (grafo == NULL || grafo->lista == NULL) {
             return ERRO_MEMORIA_INSUFICIENTE;
         }
-
+        // Verifica se a origem está no escopo do grafo
         if (origem < 0 || origem >= grafo->V) {
             return ERRO_VERTICE_INVALIDO;
         }
 
         // Vetores locais
         int *fila = (int*) malloc(grafo->V * sizeof(int));
+        // Calloc garante que o vetor seja iniciado com todas as posições zeradas
         int *visitado = (int*) calloc(grafo->V, sizeof(int));
         int *distancia = (int*) malloc(grafo->V * sizeof(int));
 
@@ -153,7 +156,6 @@
         for (int i = 0; i < grafo->V; i++) {
             distancia[i] = -1; // -1 indica que o vértice ainda é inacessível
         }
-
 
         // Inicializa a estrutura com o vértice de partida
         fila[fim++] = origem;
@@ -204,18 +206,19 @@
         return GRAFO_OK;
     }
 
-    // Ordenação Topologica do Grafo
+    // Ordenação Topologica do Grafo (Variação do Algoritmo de Kahn)
+    // Obs.: funciona apenas para DAGs (Grafos Acíclicos Direcionados)
     GrafoStatus ordemTopologica(Grafo *grafo) {
         // Verifica se o grafo é válido
         if (grafo == NULL || grafo->lista == NULL)
             return ERRO_MEMORIA_INSUFICIENTE;
 
-        // Verifica se um grafo é direcionado
+        // Verifica se o grafo é direcionado (se for, não é um DAG)
         if (!grafo->direcionado) {
             return ERRO_GRAFO_NAO_DIRECIONADO;
         }
 
-        int V = grafo->V;
+        int V = grafo->V; //Número de vértices
 
         // Aloca e zera o vetor que guardará a quantidade de arestas que chegam a cada vértice
         int *grauEntrada = (int*)calloc(V, sizeof(int));
@@ -314,6 +317,7 @@
     }
 
     // Árvore Geradora Mínima (AGM) utilizando o Algoritmo de Prim.
+    // Obs.: para grafos desconexos ela fornece uma floresta geradora mínima (uma AGM por componente)
     GrafoStatus algoritmoPrim(Grafo* g) {
         // Verifica se o grafo é válido
         if (g == NULL || g->lista == NULL)
@@ -331,7 +335,7 @@
         int* chave = (int*)malloc(V * sizeof(int)); // Guarda o menor peso de aresta para conectar o vértice à AGM
         int* naAGM = (int*)calloc(V, sizeof(int));  // Mapeia se o vértice já foi incluído na árvore (0 = não, 1 = sim)
 
-        // Verifica se o grafo é válido
+        // Verifica se a alocação deu erro
         if (pai == NULL || chave == NULL || naAGM == NULL) {
             free(pai);
             free(chave);
@@ -527,6 +531,8 @@
     }
 
     //--- Funções extras ---
+
+    // Busca e retorna o peso de uma aresta que vai do vértice1 ao vértice2
     int getPesoAresta(Grafo* grafo, int vertice1, int vertice2) {
         No* atual = grafo->lista[vertice1];
         while (atual != NULL) {
@@ -536,14 +542,17 @@
             atual = atual->prox;
         }
 
-        return 0;
+        // Se a aresta não existe, retorna -1
+        return -1;
     }
 
+    // Imprime a distância e o percurso do caminho crítico (maior caminho) de um DAG
     GrafoStatus caminhoCritico (Grafo *grafo) {
+        // Verifica se o grafo é válido
         if (grafo == NULL || grafo->V == 0) {
             return ERRO_MEMORIA_INSUFICIENTE;
         }
-
+        // Verifica se o grafo é direcionado
         if (!grafo->direcionado) {
             return ERRO_GRAFO_NAO_DIRECIONADO;
         }
@@ -578,10 +587,12 @@
             return ERRO_MEMORIA_INSUFICIENTE;
         }
 
+        // Inicializando o vetor de pais
         for (int i = 0; i < grafo->V; i++) {
             pais[i] = -1;
         }
 
+        // Calculando o grau de entrada dos vértices
         for (int i = 0; i < grafo->V; i++) {
             atual = grafo->lista[i];
             while (atual != NULL) {
@@ -590,6 +601,7 @@
             }
         }
 
+        // Inserindo vértices sem predecessores
         for (int i = 0; i < grafo->V; i ++) {
             if (setasApontando[i] == 0) {
                 zeroSetasApontando[fim] = i;
@@ -597,14 +609,20 @@
             }
         }
 
+        // Algoritmo de Kahn (Ordenação Topológica) adaptado
         while (inicio < fim) {
+            // Pega o primeiro vértice sem predecessor da fila
             zeros = zeroSetasApontando[inicio];
             vertices++;
+
+            // Diminui o grau de entrada dos vértices que eram sucessores dele
             atual = grafo->lista[zeros];
             while (atual != NULL) {
                 temp = atual->destino;
                 setasApontando[temp]--;
 
+                // Se o vértice atual não possui mais vértices predecessores
+                // Adiciona ele na fila
                 if (setasApontando[temp] == 0) {
                     zeroSetasApontando[fim] = temp;
                     fim++;
@@ -612,19 +630,23 @@
 
                 atual = atual->prox;
             }
-
             inicio++;
         }
 
+        // Libera vetor que não será mais utilizado
+        free(setasApontando);
+
+        // Se foram processados mais vértices do que o grafo possui
+        // Então o grafo contém ciclo
         if (vertices < grafo->V) {
             free(zeroSetasApontando);
-            free(setasApontando);
             free(maiorCaminho);
             free(pais);
             free(caminho);
             return ERRO_GRAFO_COM_CICLOS; // ciclico;
         }
 
+        // Percorrendo a ordem topológica
         for (int i = 0; i < grafo->V; i++) {
             zeros = zeroSetasApontando[i];
             atual = grafo->lista[zeros];
@@ -632,16 +654,21 @@
                 temp = atual->destino;
                 peso = atual->peso;
 
+                // Se passar pelo vértice atual a distância do maior caminho é maior que a distância atual
                 if (maiorCaminho[zeros] + peso > maiorCaminho[temp]) {
                     maiorCaminho[temp] = maiorCaminho[zeros] + peso;
+                    // Se sim, guarda no vetor pais para imprimir o percurso
+                    pais[temp] = zeros;
                 }
 
                 atual = atual->prox;
             }
-
-
         }
 
+        // Libera vetor que não será mais utilizado
+        free(zeroSetasApontando);
+
+        // Procura o maior caminho do vetor
         maiorDistancia = maiorCaminho[0];
         for (int i = 0; i < grafo->V; i++) {
             if (maiorCaminho[i] > maiorDistancia) {
@@ -650,6 +677,10 @@
             }
         }
 
+        // Libera vetor que não será mais utilizado
+        free(maiorCaminho);
+
+        // Reconstrói o percuso no vetor caminho
         verticeAtual = ultimoVertice;
 
         while (verticeAtual != -1) { //vai do ultimo vertice ate a origem
@@ -657,9 +688,10 @@
             verticeAtual = pais[verticeAtual];
         }
 
+        printf("\n=== CAMINHO CRITICO ===\n");
         printf("A maior distancia que pode ser percorrida nesse DAG é: %d\n", maiorDistancia);
 
-        printf("Caminho Critico : ");
+        printf("Caminho Critico: ");
 
         //imprime o caminho de tras para frente para ficar o caminho do grafo original
         for (int i = indiceCaminho - 1;i >= 0; i--) {
@@ -671,15 +703,12 @@
 
         }
 
-
-        free(zeroSetasApontando);
-        free(setasApontando);
-        free(maiorCaminho);
         free(pais);
         free(caminho);
         return GRAFO_OK;
     }
 
+    // Realiza uma DFS e registra a ordem de término dos vértices na pilha.
     void DFSPilha(Grafo *grafo, int indice, int *visitados, int *pilha, int *topo){
         // Verifica se o grafo é válido
         if (grafo == NULL) {
@@ -710,7 +739,7 @@
         if (grafo == NULL || grafo->V == 0) {
             return NULL;
         }
-
+        // Cria e aloca memória para o novo gráfico
         Grafo* grafoTransposto = criarGrafo(grafo->V, grafo->A, grafo->direcionado);
         if (grafoTransposto == NULL) {
             return NULL;
@@ -718,8 +747,10 @@
 
         No *atual;
         for (int i = 0; i < grafo->V;i++) {
+            // Para cada aresta que vai de i para atual->destino
             atual = grafo->lista[i];
             while (atual != NULL) {
+                // Adiciona uma aresta que vai de atual->destino para o vértice i (aresta inversa)
                 adicionarAresta(grafoTransposto, atual->destino,i, atual->peso);
                 atual = atual->prox;
             }
@@ -734,6 +765,9 @@
         if (grafo == NULL) {
             return ERRO_MEMORIA_INSUFICIENTE;
         }
+        // Verifica se o grafo é direcionado
+        if (!grafo->direcionado)
+            return ERRO_GRAFO_NAO_DIRECIONADO;
 
         int numeroComponentes = 0;
         int vertice;
@@ -753,12 +787,14 @@
 
         int topo = -1;
 
+        // Obtém a ordem de término da DFS na pilha
         for (int i = 0; i < grafo->V; i++) {
             if (!visitados[i]) {
                 DFSPilha(grafo, i, visitados, pilha, &topo);
             }
         }
 
+        // Reinicia os vetor de controle dos visitados para próxima DFS
         for (int i = 0; i < grafo->V; i++) {
             visitados[i] = 0;
         }
@@ -771,10 +807,13 @@
             return ERRO_MEMORIA_INSUFICIENTE;
         }
 
-        printf("\n=== COMPONENTES FORTEMENTE CONEXOS ===\n\n");
+        printf("\n=== COMPONENTES FORTEMENTE CONEXOS (KOSARAJU) ===\n\n");
+
+        // Processa o vértice na ordem correta
         while (topo >= 0) {
             vertice = pilha[topo--];
 
+            // Imprime cada componente fortemente conexo do grafo transposto
             if (!visitados[vertice]){
                 numeroComponentes++;
 
