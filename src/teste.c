@@ -55,7 +55,6 @@
         tempoKosaraju = (fim.tv_sec - inicio.tv_sec) + (fim.tv_nsec -inicio.tv_nsec)/1e9;
 
         clock_gettime(CLOCK_MONOTONIC, &inicio);
-        printf("\n=== Caminho crítico ===\n");
         caminhoCritico(grafo);
         clock_gettime(CLOCK_MONOTONIC, &fim);
         tempoCC = (fim.tv_sec - inicio.tv_sec) + (fim.tv_nsec -inicio.tv_nsec)/1e9;
