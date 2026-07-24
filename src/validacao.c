@@ -24,6 +24,9 @@
             case ERRO_MEMORIA_INSUFICIENTE:
                 printf("Erro: Falha ao alocar memória para o grafo!\n");
                 break;
+            case ERRO_PESO_INVALIDO:
+                printf("Erro: Grafo com pesos invalidos\n");
+                break;
             case ERRO_GRAFO_DIRECIONADO:
                 printf("Erro: O grafo carregado é direcionado e não pode ser usado nesse algoritmo!\n");
                 break;

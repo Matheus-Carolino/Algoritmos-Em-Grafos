@@ -136,6 +136,17 @@
             return ERRO_VERTICE_INVALIDO;
         }
 
+        // Validação dos pesos do grafo
+        for (int i = 0; i < grafo->V; i++) {
+            No *aux = grafo->lista[i];
+            while (aux) {
+                if (aux->peso != 1) {
+                    return ERRO_PESO_INVALIDO;
+                }
+                aux = aux->prox;
+            }
+        }
+
         // Vetores locais
         int *fila = (int*) malloc(grafo->V * sizeof(int));
         // Calloc garante que o vetor seja iniciado com todas as posições zeradas
@@ -427,6 +438,17 @@
         // Validação do parâmetro de origem com base nos limites do grafo
         if (origem < 0 || origem >= qtdVer)
             return ERRO_VERTICE_INVALIDO;
+
+        // Validação dos pesos do grafo
+        for (int i = 0; i < qtdVer; i++) {
+            No* aux = grafo->lista[i];
+            while (aux) {
+                if (aux->peso < 0) {
+                    return ERRO_PESO_INVALIDO;
+                }
+                aux = aux->prox;
+            }
+        }
 
         // Alocação dos vetores auxiliares para o cálculo do caminho mínimo
         int *dist = (int*)malloc(qtdVer * sizeof(int));
