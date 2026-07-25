@@ -136,17 +136,6 @@
             return ERRO_VERTICE_INVALIDO;
         }
 
-        // Validação dos pesos do grafo
-        for (int i = 0; i < grafo->V; i++) {
-            No *aux = grafo->lista[i];
-            while (aux) {
-                if (aux->peso != 1) {
-                    return ERRO_PESO_INVALIDO;
-                }
-                aux = aux->prox;
-            }
-        }
-
         // Vetores locais
         int *fila = (int*) malloc(grafo->V * sizeof(int));
         // Calloc garante que o vetor seja iniciado com todas as posições zeradas
@@ -474,7 +463,7 @@
             int min = INT_MAX;
             int u = -1;
 
-            // Encontra o vértice com a menor distância estimada que ainda não foi visitado
+            // Encontra o vértice com o menor custo estimado que ainda não foi visitado
             for (int v = 0; v < qtdVer; v++) {
                 if (!visitado[v] && dist[v] < min) {
                     min = dist[v];
@@ -494,9 +483,9 @@
                 int v = adj->destino;
                 int peso = adj->peso;
 
-                // Se o vizinho não foi visitado e o caminho por 'u' for menor do que o anteriormente registrado
+                // Se o vizinho não foi visitado e o caminho por 'u' for menos custoso do que o anteriormente registrado
                 if (!visitado[v] && dist[u] != INT_MAX && dist[u] + peso < dist[v]) {
-                    dist[v] = dist[u] + peso; // Atualiza a menor distância
+                    dist[v] = dist[u] + peso; // Atualiza a menor custo
                     antecessor[v] = u;        // Define 'u' como o caminho de chegada para 'v'
                 }
                 adj = adj->prox; // Avança para o próximo vizinho na lista de adjacência
@@ -505,7 +494,7 @@
 
         // Exibição dos resultados
         printf("\n=== DIJKSTRA (Origem: %d) ===\n", origem);
-        printf("Vertice | Distancia | Caminho\n");
+        printf("Vertice |   Custo   | Caminho\n");
         printf("--------|-----------|------------------\n");
 
         // Aloca uma pilha temporária para inverter e reconstruir a ordem do caminho de cada vértice

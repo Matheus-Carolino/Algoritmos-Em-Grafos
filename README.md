@@ -24,16 +24,34 @@
 
 ---
 
-## Como Clonar e Rodar o Projeto
 ### Clonar o Repositório
 Abra o terminal na pasta onde deseja salvar o projeto e rode:
-```
+```bash
 git clone https://github.com/Matheus-Carolino/Algoritmos-Em-Grafos.git
+cd Algoritmos-Em-Grafos
 ```
 
-### Abrindo no CLion
-1. Abra o **CLion**
-2. Clique em **Open**
-3. Selecione a pasta raiz do projeto clonado
-4. O CLion irá ler o arquivo `CMakeList.txt` automaticamente. Aguarde a indexação terminar.
-5. Clique no botão de **Run**
+### Opção 1: Via CLion (Recomendado para Desenvolvimento)
+1. **Abrir projeto**: Clique em **Open** no CLion e selecione a pasta raiz.
+2. **Carregar CMake**: Aguarde a leitura automática do `CMakeLists.txt`.
+3. **Executar**: Clique no botão **Run** na interface da IDE.
+
+### Opção 2: Via Terminal (Windows)
+1. **Compilar código**: Execute o GCC apontando para todos os arquivos fontes.
+   ```cmd
+   gcc src\*.c -I include -o meu_programa.exe
+   ```
+2. **Rodar binário**: Execute o arquivo gerado diretamente no Prompt ou PowerShell.
+   ```cmd
+   .\meu_programa.exe
+   ```
+
+### Opção 3: Via Terminal (Linux)
+1. **Compilar código**: Use as barras padrões do Linux para compilar as fontes.
+   ```bash
+   gcc src/*.c -I include -o meu_programa
+   ```
+2. **Rodar binário**: Execute o programa gerado no diretório atual.
+   ```bash
+   ./meu_programa
+   ```
