@@ -6,9 +6,11 @@
 ## Desenvolvedores
 * **Matheus da Silva Carolino**
 * **Matheus Henrique Ribeiro Cardoso**
-* **Simão Baptista Sunga**
 * **Pedro Tavares Oliveira**
+* **Samuel Vaz Caixeta**
 * **Santiago Vitor Santos do Carmo**
+* **Simão Baptista Sunga**
+
 
 ---
 
