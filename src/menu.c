@@ -13,8 +13,11 @@
     void carregarGrafoDeArquivo(Grafo** grafo) {
         char op;
         printf("\nO grafo a ser carregado é direcionado? (S | N)\n");
-        scanf(" %c", &op); // O espaço limpa o buffer para evitar bugs
+        scanf(" %c", &op); // O espaço ignora caracteres de espaço em branco
         printf("\n");
+
+        int c;
+        while ((c = getchar()) != '\n' && c != EOF);
 
         int direcionado;
         if (op == 'N' || op == 'n') {
@@ -28,7 +31,19 @@
 
         char nomeArquivo[100];
         printf("Digite o caminho do arquivo (ex: ../data/grafo1.txt): ");
-        scanf("%99s", nomeArquivo); // Evita buffer overflow
+        if (fgets(nomeArquivo, sizeof(nomeArquivo), stdin) != NULL) {
+            // Verifica se o '\n' está na string
+            char *pos = strchr(nomeArquivo, '\n');
+
+            if (pos != NULL) {
+                // Se encontrou o \n, a linha inteira coube no buffer e remove o \n
+                *pos = '\0';
+            } else {
+                // Se não encontrou o \n, o texto era maior que 100 caracteres.
+                // Precisamos descartar o resto da linha para não poluir a próxima leitura!
+                while ((c = getchar()) != '\n' && c != EOF);
+            }
+        }
 
         //Evita lixo de memória residual
         if (*grafo != NULL) {
@@ -63,7 +78,7 @@
         //escolha da implementação recursiva ou iterativa
         char op;
         printf("\nQual implementação de DFS você deseja usar? (R | I)\n");
-        scanf(" %c", &op); // O espaço limpa o buffer para evitar bugs
+        scanf(" %c", &op); // O espaço ignora caracteres de espaço em branco
         printf("\n");
 
         //evita problemas com Case
