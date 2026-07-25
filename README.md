@@ -8,6 +8,7 @@
 * **Matheus Henrique Ribeiro Cardoso**
 * **Simão Baptista Sunga**
 * **Pedro Tavares Oliveira**
+* **Santiago Vitor Santos do Carmo**
 
 ---
 
