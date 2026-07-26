@@ -58,3 +58,13 @@ cd Algoritmos-Em-Grafos
    ```bash
    ./meu_programa
    ```
+---
+
+## Funcionalidades
+
+O sistema permite:
+
+- Leitura de grafos a partir de arquivos.
+- Manipulação de grafos por meio de uma interface CLI.
+- Execução dos algoritmos implementados.
+- Exibição dos resultados no terminal.
