@@ -13,4 +13,12 @@ add_executable(grafos
         src/grafo.c
         include/validacao.h
         src/validacao.c
+        include/menu.h
+        src/menu.c
+        src/algoritmos.c
+        include/algoritmos.h
+        src/estatisticas.c
+        include/estatisticas.h
+        src/teste.c
+        include/teste.h
 )

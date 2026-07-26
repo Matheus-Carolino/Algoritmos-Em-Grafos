@@ -1,7 +1,7 @@
 # Arquivos do CLion e CMake
 .idea/
 cmake-build-degub/
-cmake-build-release/
+cmake-build-release/git
 build/
 
 # Arquivos compilados e executáveis

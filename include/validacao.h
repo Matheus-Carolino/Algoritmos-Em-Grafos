@@ -8,7 +8,11 @@
         ERRO_NUMERO_INVALIDO,
         ERRO_ARESTA_INVALIDA,
         ERRO_VERTICE_INVALIDO,
-        ERRO_MEMORIA_INSUFICIENTE
+        ERRO_MEMORIA_INSUFICIENTE,
+        ERRO_PESO_INVALIDO,
+        ERRO_GRAFO_DIRECIONADO,
+        ERRO_GRAFO_NAO_DIRECIONADO,
+        ERRO_GRAFO_COM_CICLOS,
     } GrafoStatus;
 
 void imprimirMensagemGrafo(GrafoStatus status);

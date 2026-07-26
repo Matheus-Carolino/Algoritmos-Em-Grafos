@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "validacao.h"
     void imprimirMensagemGrafo(GrafoStatus status) {
@@ -20,10 +19,22 @@
                 printf("Erro: Uma ou mais arestas possuem vertices invalidos!\n");
                 break;
             case ERRO_VERTICE_INVALIDO:
-                printf("Erro: Uma ou mais vertices possuem vertices invalidos!\n");
+                printf("Erro: Vértice invalido!\n");
                 break;
             case ERRO_MEMORIA_INSUFICIENTE:
                 printf("Erro: Falha ao alocar memória para o grafo!\n");
+                break;
+            case ERRO_PESO_INVALIDO:
+                printf("Erro: Grafo com pesos invalidos\n");
+                break;
+            case ERRO_GRAFO_DIRECIONADO:
+                printf("Erro: O grafo carregado é direcionado e não pode ser usado nesse algoritmo!\n");
+                break;
+            case ERRO_GRAFO_NAO_DIRECIONADO:
+                printf("Erro: O grafo carregado é não direcionado e não pode ser usado nesse algoritmo!\n");
+                break;
+            case ERRO_GRAFO_COM_CICLOS:
+                printf("Erro: O grafo contém ciclos e não pode ser usado nesse algoritmo!\n");
                 break;
             default:
                 printf("Erro: Desconhecido!");
